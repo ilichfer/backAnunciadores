@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SB Admin 2 - Registro</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-gradient-primary">
+
+    <div class="container">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+                    <div class="col-lg-5 d-none d-lg-block ">
+                        <img height="40%" width="100%" alt="logo" src="img/logo.jpeg"></div>
+                    <div class="col-lg-7">
+                        <div class="p-5">
+                            <div class="text-center">
+                                <h1 class="h4 text-gray-900 mb-4">Actualiza tus datos!</h1>
+                            </div>
+                            <div class="text-center" th:if="${msj != null}">
+                                <label class="alert alert-danger" th:text="${msj}"></label>
+                            </div>
+                            <form method="POST" th:action="@{/actualizarPerfil}">
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0" style="display:none;">
+                                        <input type="text" class="form-control form-control-user" name="id"
+                                               id="id" placeholder="id" th:value="${persona.id}" >
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="text" class="form-control form-control-user" name="nombre"
+                                            id="nombre" placeholder="nombre" th:value="${persona.nombre}" >
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control form-control-user" name="apellido"
+                                            id="apellido" placeholder="apellido" th:value="${persona.apellido}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-6">
+                                        <input type="number" class="form-control form-control-user" name="documento"
+                                            id="documento" placeholder="No de documento" th:value="${persona.documento}" readonly>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <select class="form-control" name="tipodocumento"
+                                            id="tipodocumento" >
+                                            <option th:each="documento : ${listaDocumento}" th:value="${documento.descripcion}" th:text="${documento.descripcion}"
+                                                    th:selected="${documento.descripcion==persona.tipodocumento}" required></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <label for="escolaridad">fecha de nacimiento</label>
+                                        <input type="date" class="form-control form-control-user" name="fechanacimiento"
+                                            id="fechanacimiento" th:value="${persona.fechanacimiento}">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="escolaridad">Numero de telefono</label>
+                                        <input type="number" class="form-control form-control-user" name="telefono"
+                                            id="telefono" placeholder="telefono" th:value="${persona.telefono}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <label for="genero">Genero</label>
+                                        <select class="form-control" name="genero"
+                                                id="genero">
+                                            <option th:each="genero : ${listaGenero}" th:value="${genero.descripcion}" th:text="${genero.descripcion}"
+                                                    th:selected="${genero.descripcion==persona.genero}" required></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <label for="estadoCivil">estado Civil</label>
+                                        <select class="form-control" name="estadoCivil"
+                                                id="estadoCivil" >
+                                            <option th:each="estadoCivil : ${listaEstadoCivil}" th:value="${estadoCivil.descripcion}" th:text="${estadoCivil.descripcion}"
+                                                    th:selected="${estadoCivil.descripcion==persona.estadoCivil}" required></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="text" class="form-control form-control-user" name="paisNacimiento"
+                                               id="paisNacimiento" placeholder="pais de Nacimiento" th:value="${persona.paisNacimiento}">
+
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="text" class="form-control form-control-user" name="ciudad"
+                                               id="ciudad" placeholder="ciudad de Nacimiento" th:value="${persona.ciudad}">
+
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-5 mb-3 mb-sm-0" style="margin-left:25px">
+                                        <input type="checkbox" class="form-check-input" name="discapacidad"
+                                               id="discapacidad"  />
+                                        <label lass="form-check-input" for="discapacidad">posee una discapacidad?</label>
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="text" class="form-control form-control-user" name="descDiscapacidad"
+                                               id="descDiscapacidad" placeholder="descripcion Discapacidad" th:value="${persona.descDiscapacidad}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-sm-5 mb-3 mb-sm-0" style="margin-left:25px">
+                                        <input type="checkbox" class="form-check-input" name="perteneceMinoria"
+                                               id="perteneceMinoria"  />
+                                        <label lass="form-check-input" for="perteneceMinoria">pertenece a una Minoria?</label>
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+
+                                        <input type="text" class="form-control form-control-user" name="descMinoria"
+                                               id="descMinoria" placeholder="descripcion Minoria"  th:value="${persona.descMinoria}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+
+                                        <input type="text" class="form-control form-control-user" name="direccion"
+                                               id="direccion" placeholder="direccion" th:value="${persona.direccion}">
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+
+                                        <input type="text" class="form-control form-control-user" name="ciudadDeptoDireccion"
+                                               id="ciudadDeptoDireccion" placeholder="ciudad de recidencia" th:value="${persona.ciudadDeptoDireccion}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+
+                                        <input type="text" class="form-control form-control-user" name="celular"
+                                               id="celular" placeholder="No celular" th:value="${persona.celular}">
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+
+                                        <input type="text" class="form-control form-control-user" name="ocupacion"
+                                               id="ocupacion" placeholder="ocupacion" th:value="${persona.ocupacion}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+
+                                        <label for="escolaridad">escolaridad</label>
+                                        <select class="form-control" name="escolaridad"
+                                                id="escolaridad" >
+                                            <option th:each="escolaridad : ${listaEscolaridad}" th:value="${escolaridad.descripcion}" th:text="${escolaridad.descripcion}"
+                                                    th:selected="${escolaridad.descripcion==persona.escolaridad}" required></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <label for="escolaridad">fecha de conversion a cristo</label>
+                                        <input type="date" class="form-control form-control-user" name="fechaConvercionCristo"
+                                               id="fechaConvercionCristo" th:value="${persona.fechaConvercionCristo}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <label for="escolaridad">fecha llegada a ADC</label>
+                                        <input type="date" class="form-control form-control-user" name="fechaLlegadaAdc"
+                                               id="fechaLlegadaAdc" th:value="${persona.fechaLlegadaAdc}">
+                                    </div>
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <label for="escolaridad">fecha de bautizo en agua</label>
+                                        <input type="date" class="form-control form-control-user" name="fechaBautizo"
+                                               id="fechaBautizo" th:value="${persona.fechaBautizo}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <label for="escolaridad">fecha de Bautizo en el espiritu</label>
+                                        <input type="date" class="form-control form-control-user" name="fechaBautizoEspiritu"
+                                               id="fechaBautizoEspiritu" th:value="${persona.fechaBautizoEspiritu}" >
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" class="form-control form-control-user" name="email" id="email"
+                                        placeholder="Email" th:value="${persona.email}">
+                                </div>
+                                <input type="submit" value="Registrar" class="btn btn-primary container">
+                                <hr>
+                            </form>
+                            <hr>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="js/sb-admin-2.min.js"></script>
+    <!-- Cargar local Storage-->
+    <script src="js/storage.js"></script>
+
+</body>
+
+</html>
