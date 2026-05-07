@@ -2,20 +2,23 @@
   import com.anunciadores.auth.dto.reporRequest;
   import com.anunciadores.auth.dto.updateServiceRequest;
   import com.anunciadores.dto.*;
-  import com.anunciadores.model.Coordinador;
-  import com.anunciadores.model.Persona;
-  import com.anunciadores.repository.*;
-  import com.anunciadores.service.UsuarioService;
-  import com.anunciadores.service.interfaces.*;
-  import com.anunciadores.util.UtilDate;
+import com.anunciadores.model.Coordinador;
+import com.anunciadores.model.Ministerio;
+import com.anunciadores.model.Persona;
+import com.anunciadores.repository.*;
+import com.anunciadores.service.UsuarioService;
+import com.anunciadores.service.interfaces.*;
+import com.anunciadores.util.UtilDate;
+import com.anunciadores.model.Notificacion;
   import com.fasterxml.jackson.core.JsonProcessingException;
   import com.fasterxml.jackson.databind.JsonMappingException;
 
   import java.io.IOException;
   import java.text.ParseException;
   import java.text.SimpleDateFormat;
-  import java.time.LocalDate;
-  import java.util.Date;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
   import java.util.List;
   import javax.servlet.http.HttpServletRequest;
 
@@ -90,6 +93,10 @@ import org.springframework.web.bind.annotation.*;
     
     @Autowired
     private ITdcService tdcService;
+
+    @Autowired
+    private INotificacionService notificacionService;
+
     List<Persona> personasList;
     List<PersonaDto> personasListDto;
     
@@ -532,17 +539,100 @@ import org.springframework.web.bind.annotation.*;
     }
     
     @PostMapping({"/saveService"})
-    public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
+public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
       ResponseEntity<?> rp;
       try {
-/* 494 */       List<Persona> listamultiple = this.servicioService.saveProgram(request);
-        
-/* 496 */       rp = new ResponseEntity(listamultiple, null, HttpStatus.ACCEPTED);
+        List<Persona> listamultiple = this.servicioService.saveProgram(request);
+
+        for (ServiceDTO dto : request) {
+          if (dto.getIdPersona() != null && dto.getIdMinisterio() != null) {
+            try {
+              Integer idPersona = Integer.parseInt(dto.getIdPersona());
+              Integer idMinisterio = Integer.parseInt(dto.getIdMinisterio());
+              String posicion = dto.getIdPosicion() != null ? servicioService.findPosicion(Integer.valueOf(dto.getIdPosicion())).getNombrePosicion(): "Servicio";
+
+              Ministerio min = this.servicioService.findByidMnisterio(idMinisterio);
+              String nombreMinisterio = min != null ? min.getNombre() : "Ministerio";
+
+              LocalDate fechaLocal = dto.getFechaServicio();
+              Date fechaServicio = fechaLocal != null ? Date.from(fechaLocal.atStartOfDay(ZoneId.systemDefault()).toInstant()) : new Date();
+
+              this.notificacionService.crearNotificacionAsignacion(idPersona, fechaServicio, idMinisterio, nombreMinisterio, posicion);
+            } catch (Exception ex) {
+              LOGGER.warn("Error al crear notificación para servicio: ", ex);
+            }
+          }
+        }
+
+        rp = new ResponseEntity(listamultiple, null, HttpStatus.ACCEPTED);
       }
-/* 498 */     catch (ResponseStatusException e) {
-/* 499 */       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getReason());
-      } 
-/* 501 */     return rp;
+      catch (ResponseStatusException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getReason());
+      }
+      return rp;
+    }
+
+    @GetMapping({"/notificaciones/{idPersona}"})
+    public ResponseEntity<?> getNotificaciones(@PathVariable Integer idPersona) {
+      try {
+        List<Notificacion> notificaciones = this.notificacionService.getNotificacionesPorPersona(idPersona);
+        return ResponseEntity.ok(notificaciones);
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al obtener notificaciones: " + e.getMessage());
+      }
+    }
+
+    @GetMapping({"/notificaciones/{idPersona}/no-leidas"})
+    public ResponseEntity<?> getNotificacionesNoLeidas(@PathVariable Integer idPersona) {
+      try {
+        List<Notificacion> notificaciones = this.notificacionService.getNotificacionesNoLeidas(idPersona);
+        return ResponseEntity.ok(notificaciones);
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al obtener notificaciones: " + e.getMessage());
+      }
+    }
+
+    @GetMapping({"/notificaciones/{idPersona}/count"})
+    public ResponseEntity<?> getCountNoLeidas(@PathVariable Integer idPersona) {
+      try {
+        Integer count = this.notificacionService.countNotificacionesNoLeidas(idPersona);
+        return ResponseEntity.ok(count);
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al contar notificaciones: " + e.getMessage());
+      }
+    }
+
+    @PutMapping({"/notificaciones/{id}/leida"})
+    public ResponseEntity<?> marcarLeida(@PathVariable Integer id) {
+      try {
+        Notificacion notificacion = this.notificacionService.marcarLeida(id);
+        if (notificacion != null) {
+          return ResponseEntity.ok(notificacion);
+        }
+        return ResponseEntity.status(404).body("Notificación no encontrada");
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al marcar notificación: " + e.getMessage());
+      }
+    }
+
+    @PutMapping({"/notificaciones/{idPersona}/leer-todas"})
+    public ResponseEntity<?> marcarTodasLeidas(@PathVariable Integer idPersona) {
+      try {
+        this.notificacionService.marcarTodasLeidas(idPersona);
+        return ResponseEntity.ok(true);
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al marcar notificaciones: " + e.getMessage());
+      }
+    }
+
+    @DeleteMapping({"/notificaciones/{idPersona}/limpiar/{dias}"})
+    public ResponseEntity<?> limpiarNotificaciones(@PathVariable Integer idPersona, @PathVariable Integer dias) {
+      try {
+        this.notificacionService.eliminarNotificacionesAntiguas(idPersona, dias);
+        return ResponseEntity.ok(true);
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al limpiar notificaciones: " + e.getMessage());
+      }
     }
   }
 
