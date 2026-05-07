@@ -13,6 +13,7 @@
   import java.text.ParseException;
   import java.text.SimpleDateFormat;
   import java.time.LocalDate;
+  import java.time.OffsetDateTime;
   import java.time.format.DateTimeFormatter;
   import java.util.ArrayList;
   import java.util.Date;
@@ -153,12 +154,12 @@
 /* 153 */     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 /* 154 */     LocalDate ld = LocalDate.parse(dateBog, dtf);
       
-/* 156 */     int monthDays = ld.lengthOfMonth();
+/* 156 */     int diaActual = ld.getDayOfMonth();
 /* 157 */     int year = ld.getYear();
 /* 158 */     int month = ld.getMonthValue();
       
-/* 160 */     String fechainicial = "" + year + "-" + year + "-1";
-/* 161 */     String fechaFinal = "" + year + "-" + year + "-" + month;
+/* 160 */     String fechainicial = "" + year +  "-1" + "-" + month ;
+/* 161 */     String fechaFinal = "" + year + "-" + diaActual + "-" + month;
       
 /* 163 */     java.util.Date date1 = sdf.parse(fechainicial);
 /* 164 */     java.util.Date date2 = sdf.parse(fechaFinal);
@@ -197,7 +198,7 @@
 /* 202 */     TdcDto dto = new TdcDto();
 /* 203 */     dto.setId(tdc.getId());
 /* 204 */     dto.setTdc(tdc.getTdc());
-/* 205 */     dto.setFechaCreacion(tdc.getFechaCreacion());
+/* 205 */     dto.setFechaCreacion(utilDate.convertDateToString(tdc.getFechaCreacion()));
 /* 206 */     dto.setNombredocumento(tdc.getNombredocumento());
 /* 207 */     dto.setUrlImage(tdc.getUrlImage());
       try {

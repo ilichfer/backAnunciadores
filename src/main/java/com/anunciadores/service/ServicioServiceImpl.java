@@ -632,8 +632,8 @@ import javax.servlet.http.HttpSession;
 /*  598 */               Integer.valueOf(month), Integer.valueOf(year), Integer.valueOf(monthDays), 
 /*  599 */               Integer.valueOf(year), Integer.valueOf(yearDays)
 /*      */             });
-/*  601 */         String fechainicial = "" + year + "-" + year + "-1";
-/*  602 */         String fechaFinal = "" + year + "-" + year + "-" + month;
+/*  601 */         String fechainicial = "" + year + "-" + month + "-1";
+/*  602 */         String fechaFinal = "" + year + "-" + month + "-" + monthDays;
 /*      */         
 /*  604 */         Date date1 = sdf.parse(fechainicial);
 /*  605 */         Date date2 = sdf.parse(fechaFinal);

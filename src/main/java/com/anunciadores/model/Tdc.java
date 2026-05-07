@@ -74,11 +74,11 @@
     public void setTdc(String tdc) {
 /*  75 */     this.tdc = tdc;
     }
-    
+
     public Date getFechaCreacion() {
-/*  79 */     return this.fechaCreacion;
+      return fechaCreacion;
     }
-    
+
     public void setFechaCreacion(Date fechaCreacion) {
 /*  83 */     this.fechaCreacion = fechaCreacion;
     }

@@ -11,7 +11,7 @@ import java.util.Date;
 /*    */   private int id;
 /*    */   String tdc;
 /*    */   Persona persona;
-/*    */   Date fechaCreacion;
+/*    */   String fechaCreacion;
 /*    */   String nombredocumento;
 /*    */   String urlImage;
 /*    */   
@@ -47,11 +47,11 @@ import java.util.Date;
 /* 67 */     this.persona = persona;
 /*    */   }
 
-    public Date getFechaCreacion() {
+    public String getFechaCreacion() {
         return fechaCreacion;
     }
 
-    public void setFechaCreacion(Date fechaCreacion) {
+    public void setFechaCreacion(String fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
 
