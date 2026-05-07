@@ -31,21 +31,33 @@
 /* 31 */     this.publicUrl = publicUrl;
 /*    */   }
 /*    */   
-/*    */   public String uploadImage(MultipartFile file) throws IOException {
-/* 35 */     String fileName = "" + UUID.randomUUID() + "_" + UUID.randomUUID();
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */ 
-/*    */     
-/* 41 */     PutObjectRequest request = (PutObjectRequest)PutObjectRequest.builder().bucket(this.bucket).key(fileName).contentType(file.getContentType()).build();
-/*    */ 
-/*    */     
-/* 44 */     this.r2Client.getClient().putObject(request, 
-/* 45 */         RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-/*    */     
-/* 47 */     return this.publicUrl + "/" + this.publicUrl;
-/*    */   }
+/*    */ public String uploadImage(MultipartFile file) throws IOException {
+    // 1. Obtener la extensión original (ej: "jpg", "png", "webp")
+    String originalName = file.getOriginalFilename();
+    String extension = "png"; // Por defecto por si no se encuentra
+
+    if (originalName != null && originalName.contains(".")) {
+        extension = originalName.substring(originalName.lastIndexOf(".") + 1);
+    }
+
+    // 2. Generar el nombre usando UUID + la extensión real
+    String fileName = UUID.randomUUID().toString() + "." + extension;
+
+    // 3. Configurar la petición
+    // Usamos file.getContentType() para que coincida con el archivo real
+    PutObjectRequest request = PutObjectRequest.builder()
+            .bucket(this.bucket)
+            .key(fileName)
+            .contentType(file.getContentType())
+            .build();
+
+    // 4. Subir al R2
+    this.r2Client.getClient().putObject(request,
+            RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+    // 5. Retornar la URL bien formada
+    return this.publicUrl + "/" + fileName;
+}
 /*    */ }
 
 

@@ -268,28 +268,41 @@ import org.springframework.web.bind.annotation.*;
   
     
     @PostMapping({"/upload"})
-    public ResponseEntity<String> uploadImage(@RequestParam("image") MultipartFile file, @RequestParam("idPersona") Integer idPersona) {
-      try {
-/* 273 */       String imageUrl = this.r2UploadService.uploadImage(file);
-  
-        
-/* 276 */       ImagenDiariaDto imagen = new ImagenDiariaDto();
-/* 277 */       imagen.setIdPersona(idPersona.intValue());
-/* 278 */       imagen.setFechaCreacion(LocalDate.now());
-/* 279 */       imagen.setTdc(imageUrl);
-        
-/* 281 */       this.tdcService.saveTcdImage(imageUrl, idPersona);
-        
-/* 283 */       return ResponseEntity.ok(imageUrl);
-      }
-/* 285 */     catch (IOException e) {
-/* 286 */       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-/* 287 */         .body("Error al subir la imagen");
-      } 
+    public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile file, @RequestParam("idPersona") Integer idPersona) {
+        ResponseEntity<String> rp = null;
+        try {
+            List<TdcDto> tcd = tdcService.getTdcByFecha(utilDate.cargarfechaActualBogotaDate());
+
+            if (tcd.isEmpty() ) {
+                String imageUrl = this.r2UploadService.uploadImage(file);
+
+                /* 276 */
+                ImagenDiariaDto imagen = new ImagenDiariaDto();
+                /* 277 */
+                imagen.setIdPersona(idPersona.intValue());
+                /* 278 */
+                imagen.setFechaCreacion(LocalDate.now());
+                /* 279 */
+                imagen.setTdc(imageUrl);
+
+                /* 281 */
+                this.tdcService.saveTcdImage(imageUrl, idPersona);
+
+                /* 283 */
+                return ResponseEntity.ok(imageUrl);
+            }
+            rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el tcd");
+
+            /* 285 */
+        } catch (ParseException | IOException e) {
+            rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+
+        }
+        return rp;
     }
-  
-    
-    @PostMapping({"/scheduleByDate"})
+
+
+        @PostMapping({"/scheduleByDate"})
     public ResponseEntity<?> scheduleByDate(@RequestBody reporRequest request) throws ParseException {
 /* 294 */     ResponseEntity<List<TdcReporteDto>> rp = null;
 /* 295 */     if (request.getFechaInicio() != null && request.getFechaFin() != null) {
