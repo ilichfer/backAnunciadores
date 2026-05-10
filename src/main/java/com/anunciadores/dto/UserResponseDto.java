@@ -16,7 +16,7 @@
 /*    */   
 /*    */   public UserResponseDto(Persona p) {
 /* 18 */     this.id = Long.valueOf(p.getId().longValue());
-/* 19 */     this.name = (p.getNombre() + " " + p.getNombre()).trim();
+/* 19 */     this.name = (p.getNombre() + " " + p.getApellido()).trim();
 /* 20 */     this.role = "ADMINISTRADOR";
 /* 21 */     this.email = p.getEmail();
 /* 22 */     this.phone = (p.getCelular() != null) ? p.getCelular() : p.getTelefono();

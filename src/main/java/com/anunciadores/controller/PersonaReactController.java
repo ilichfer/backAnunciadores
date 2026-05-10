@@ -301,7 +301,7 @@ import org.springframework.web.bind.annotation.*;
             rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el tcd");
 
             /* 285 */
-        } catch (ParseException | IOException e) {
+        } catch (IOException e) {
             rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 
         }

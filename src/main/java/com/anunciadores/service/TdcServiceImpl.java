@@ -158,8 +158,8 @@
 /* 157 */     int year = ld.getYear();
 /* 158 */     int month = ld.getMonthValue();
       
-/* 160 */     String fechainicial = "" + year +  "-1" + "-" + month ;
-/* 161 */     String fechaFinal = "" + year + "-" + diaActual + "-" + month;
+/* 160 */     String fechainicial = "" + year  + "-" + month +  "-1";
+/* 161 */     String fechaFinal = "" + year +  "-" + month + "-" + diaActual;
       
 /* 163 */     java.util.Date date1 = sdf.parse(fechainicial);
 /* 164 */     java.util.Date date2 = sdf.parse(fechaFinal);
