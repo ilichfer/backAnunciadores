@@ -278,9 +278,9 @@ import org.springframework.web.bind.annotation.*;
     public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile file, @RequestParam("idPersona") Integer idPersona) {
         ResponseEntity<String> rp = null;
         try {
-            List<TdcDto> tcd = tdcService.getTdcByFecha(utilDate.cargarfechaActualBogotaDate());
+            boolean tcd = tdcService.getTdcByFechaAndPersona(utilDate.cargarfechaActualBogotaDate(),idPersona);
 
-            if (tcd.isEmpty() ) {
+            if (tcd ) {
                 String imageUrl = this.r2UploadService.uploadImage(file);
 
                 /* 276 */
@@ -298,12 +298,14 @@ import org.springframework.web.bind.annotation.*;
                 /* 283 */
                 return ResponseEntity.ok(imageUrl);
             }
-            rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el tcd");
+            rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error tcd ya cargado para hoy "+ utilDate.cargarfechaActualBogotaDate());
 
             /* 285 */
         } catch (IOException e) {
             rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 
+        } catch (ParseException e) {
+            rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
         return rp;
     }

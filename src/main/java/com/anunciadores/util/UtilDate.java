@@ -21,15 +21,11 @@
     }
 
 
-      public Date cargarfechaActualBogotaDate() {
-          // 1. Obtenemos solo la fecha (día/mes/año) de Bogotá
-          LocalDate todayInBogota = LocalDate.now(ZoneId.of("America/Bogota"));
-
-          // 2. La convertimos al inicio del día (00:00:00) en esa misma zona
-          ZonedDateTime startOfDay = todayInBogota.atStartOfDay(ZoneId.of("America/Bogota"));
-
-          // 3. Convertimos a java.util.Date
-          return Date.from(startOfDay.toInstant());
+      public Date cargarfechaActualBogotaDate() throws ParseException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        /* 18 */     ZonedDateTime nowInBogota = ZonedDateTime.now(ZoneId.of("America/Bogota"));
+        /* 19 */     String fechaActualStr = nowInBogota.format(formatter);
+          return convertStringToDate(fechaActualStr);
       }
     
     public String convertDateToString(Date fecha) {
@@ -69,6 +65,13 @@
 /* 67 */     System.out.println("LocalDate: " + localDate);
 /* 68 */     System.out.println("Date: " + date);
 /* 69 */     return date;
+    }
+
+    public Date[] getRangoDiaBogota(LocalDate dia) {
+      ZoneId bogota = ZoneId.of("America/Bogota");
+      Date inicio = Date.from(dia.atStartOfDay(bogota).toInstant());
+      Date fin    = Date.from(dia.plusDays(1).atStartOfDay(bogota).toInstant());
+      return new Date[]{inicio, fin};
     }
   }
 

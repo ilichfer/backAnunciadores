@@ -40,12 +40,18 @@ public interface IServicioRepo extends JpaRepository<Servicio, Integer> {
   
   @Query(value = "SELECT fecha_servicio FROM servicio ORDER BY ABS(TIMESTAMPDIFF(SECOND, fecha_servicio, NOW())) ASC LIMIT 1", nativeQuery = true)
   Optional<Date> findNextDateService();
-  
-  @Query("SELECT DISTINCT s.idMinisterio FROM Servicio s where s.fechaServicio = :fecha ")
-  Optional<List<Integer>> findDistinctIdMinisterio(@Param("fecha") Date paramDate);
+
+  @Query("SELECT DISTINCT s.idMinisterio FROM Servicio s WHERE s.fechaServicio = :fecha")
+  Optional<List<Integer>> findDistinctIdMinisterio(@Param("fecha") Date fecha);
   
   @Query(value = "select s.fecha_servicio,m.nombre ,pm.id ,pm.nombre_posicion, concat(p.nombre,' ',p.apellido), p.id as id_persona     from servicio s     \n    join persona p on s.id_Persona = p.id     \n    join posiciones_ministerios  pm on s.id_posicion = pm.id     \n    join ministerios  m on pm.id_Ministerio = m.id     \n    WHERE s.fecha_servicio = :fecha    \n    and m.id = :idMinisterio", nativeQuery = true)
   List<Object> findMInisteriesAndpositions(@Param("fecha") Date paramDate, @Param("idMinisterio") int paramInt);
+
+  @Query("SELECT DISTINCT s.idMinisterio FROM Servicio s WHERE s.fechaServicio >= :inicio AND s.fechaServicio < :fin")
+  Optional<List<Integer>> findDistinctIdMinisterio(
+          @Param("inicio") Date inicio,
+          @Param("fin") Date fin
+  );
 }
 
 
