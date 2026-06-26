@@ -52,6 +52,15 @@ public interface IServicioRepo extends JpaRepository<Servicio, Integer> {
           @Param("inicio") Date inicio,
           @Param("fin") Date fin
   );
+
+  @Query("SELECT s FROM Servicio s WHERE s.idPersona = :idPersona AND s.fechaServicio >= :fechaActual AND s.fechaServicio <= :fechaLimite ORDER BY s.fechaServicio ASC")
+  List<Servicio> findServiciosProximosPersona(@Param("idPersona") int idPersona, @Param("fechaActual") Date fechaActual, @Param("fechaLimite") Date fechaLimite);
+
+  @Query("SELECT s FROM Servicio s WHERE s.idPersona = :idPersona AND s.fechaServicio >= :inicioMes AND s.fechaServicio <= :finMes ORDER BY s.fechaServicio ASC")
+  List<Servicio> findServiciosMesPersona(@Param("idPersona") int idPersona, @Param("inicioMes") Date inicioMes, @Param("finMes") Date finMes);
+
+  @Query("SELECT m.nombre, COUNT(s.id) FROM Servicio s JOIN PosicionesMinisterio pm ON s.idPosicion = pm.id JOIN Ministerio m ON pm.idMinisterio = m.id WHERE s.idPersona = :idPersona AND s.fechaServicio >= :inicioMes AND s.fechaServicio <= :finMes GROUP BY m.nombre")
+  List<Object[]> countServiciosPorMinisterio(@Param("idPersona") int idPersona, @Param("inicioMes") Date inicioMes, @Param("finMes") Date finMes);
 }
 
 
