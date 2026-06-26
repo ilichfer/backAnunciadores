@@ -21,7 +21,9 @@ public interface ITdcService {
   List<TdcDto> getAll();
   
   List<TdcDto> getTdcByFecha(Date paramDate);
-  
+
+  List<Tdc> getTdcByFechaAndPersonaList(Date paramDate, int idPersona);
+
   boolean getTdcByFechaAndPersona(Date paramDate, int paramInt);
   
   List<TdcReporteDto> findAllBetweenDates(Date paramDate1, Date paramDate2) throws ParseException;

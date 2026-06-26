@@ -5,6 +5,8 @@
 import com.anunciadores.model.Coordinador;
 import com.anunciadores.model.Ministerio;
 import com.anunciadores.model.Persona;
+import com.anunciadores.model.Servicio;
+import com.anunciadores.model.Tdc;
 import com.anunciadores.repository.*;
 import com.anunciadores.service.UsuarioService;
 import com.anunciadores.service.interfaces.*;
@@ -275,12 +277,19 @@ import org.springframework.web.bind.annotation.*;
   
     
     @PostMapping({"/upload"})
-    public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile file, @RequestParam("idPersona") Integer idPersona) {
+    public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile file, @RequestParam("idPersona") Integer idPersona) throws ParseException {
         ResponseEntity<String> rp = null;
+        LOGGER.info("[UPLOAD] idPersona={} | fecha={} | archivo={} | tamaño={}KB | tipo={}",
+                idPersona,
+                utilDate.cargarfechaActualBogotaString(),
+                file.getOriginalFilename(),
+                file.getSize() / 1024,
+                file.getContentType()
+        );
         try {
-            List<TdcDto> tcd = tdcService.getTdcByFecha(utilDate.cargarfechaActualBogotaDate());
+            boolean tcd = tdcService.getTdcByFechaAndPersona(utilDate.cargarfechaActualBogotaDate(),idPersona);
 
-            if (tcd.isEmpty() ) {
+            if (tcd ) {
                 String imageUrl = this.r2UploadService.uploadImage(file);
 
                 /* 276 */
@@ -298,12 +307,14 @@ import org.springframework.web.bind.annotation.*;
                 /* 283 */
                 return ResponseEntity.ok(imageUrl);
             }
-            rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el tcd");
+            rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("tcd ya cargado para hoy "+ utilDate.cargarfechaActualBogotaString());
 
             /* 285 */
-        } catch (ParseException | IOException e) {
+        } catch (IOException e) {
             rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 
+        } catch (ParseException e) {
+            rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
         return rp;
     }
@@ -632,6 +643,111 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.ok(true);
       } catch (Exception e) {
         return ResponseEntity.status(500).body("Error al limpiar notificaciones: " + e.getMessage());
+      }
+    }
+
+    @GetMapping({"/dashboard/stats/{idPersona}"})
+    public ResponseEntity<?> getDashboardStats(@PathVariable Integer idPersona) {
+      try {
+        DashboardStatsDto stats = new DashboardStatsDto();
+
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        Date fechaActual = utilDate.cargarfechaActualBogotaDate();
+
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+        cal.set(java.util.Calendar.MINUTE, 59);
+        cal.set(java.util.Calendar.SECOND, 59);
+        Date fechaLimite7dias = cal.getTime();
+
+        cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        cal.set(java.util.Calendar.MINUTE, 0);
+        cal.set(java.util.Calendar.SECOND, 0);
+        Date inicioMes = cal.getTime();
+
+        cal.set(java.util.Calendar.DAY_OF_MONTH, cal.getActualMaximum(java.util.Calendar.DAY_OF_MONTH));
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+        cal.set(java.util.Calendar.MINUTE, 59);
+        cal.set(java.util.Calendar.SECOND, 59);
+        Date finMes = cal.getTime();
+
+        List<Servicio> serviciosProximos = servicioService.getServiciosProximosPersona(idPersona, fechaActual, fechaLimite7dias);
+        stats.setServiciosProximos(serviciosProximos.size());
+
+        List<Servicio> serviciosMes = servicioService.getServiciosMesPersona(idPersona, inicioMes, finMes);
+        stats.setServiciosDelMes(serviciosMes.size());
+
+        int totalServiciosMes = serviciosMes.size();
+        int serviciosAsistidos = 0;
+        for (Servicio s : serviciosMes) {
+          if ("ASISTIO".equalsIgnoreCase(s.getAsistencia())) {
+            serviciosAsistidos++;
+          }
+        }
+        stats.setTotalServiciosMes(totalServiciosMes);
+        int porcentaje = totalServiciosMes > 0 ? (serviciosAsistidos * 100) / totalServiciosMes : 0;
+        stats.setPorcentajeCumplimiento(porcentaje);
+
+        Integer countNotif = notificacionService.countNotificacionesNoLeidas(idPersona);
+        stats.setNotificacionesPendientes(countNotif != null ? countNotif : 0);
+
+        List<Tdc> tdcHoy = tdcService.getTdcByFechaAndPersonaList(fechaActual, idPersona);
+        stats.setTcdSubidoHoy(tdcHoy != null && !tdcHoy.isEmpty());
+
+        List<PersonaDto> cumpleaneros = personaService.findBirthdayByMonth();
+        int proximosCumples = 0;
+        java.util.Calendar calCumple = java.util.Calendar.getInstance();
+        int diaHoy = calCumple.get(java.util.Calendar.DAY_OF_MONTH);
+        int mesHoy = calCumple.get(java.util.Calendar.MONTH);
+        for (PersonaDto p : cumpleaneros) {
+          if (p.getFechanacimiento() != null) {
+            try {
+              String[] partes = p.getFechanacimiento().split("/");
+              if (partes.length >= 2) {
+                int diaCumple = Integer.parseInt(partes[0]);
+                if (diaCumple >= diaHoy && diaCumple <= diaHoy + 7) {
+                  proximosCumples++;
+                }
+              }
+            } catch (Exception ex) {}
+          }
+        }
+        stats.setProximosCumpleanos(proximosCumples);
+
+        List<ProximoServicioDto> proximosServicios = new java.util.ArrayList<>();
+        for (Servicio s : serviciosProximos) {
+          if (s.getFechaServicio() != null) {
+            String fechaStr = new SimpleDateFormat("yyyy-MM-dd").format(s.getFechaServicio());
+            String horaStr = "";
+            try {
+              horaStr = s.getFechaServicio().toString().split(" ")[3];
+            } catch (Exception ex) {}
+            String nombreMinisterio = "";
+            String nombrePosicion = "";
+            if (s.getIdMinisterio() > 0) {
+              Ministerio min = servicioService.findByidMnisterio(s.getIdMinisterio());
+              if (min != null) {
+                nombreMinisterio = min.getNombre();
+              }
+            }
+            proximosServicios.add(new ProximoServicioDto(fechaStr, horaStr, nombreMinisterio, nombrePosicion));
+          }
+        }
+        stats.setProximosServicios(proximosServicios);
+
+        List<Object[]> serviciosPorMin = servicioService.getServiciosPorMinisterio(idPersona, inicioMes, finMes);
+        List<ServicioPorMinisterioDto> serviciosPorMinisterio = new java.util.ArrayList<>();
+        for (Object[] row : serviciosPorMin) {
+          String nombreMin = row[0] != null ? row[0].toString() : "";
+          int cantidad = row[1] != null ? ((Number) row[1]).intValue() : 0;
+          serviciosPorMinisterio.add(new ServicioPorMinisterioDto(nombreMin, cantidad));
+        }
+        stats.setServiciosPorMinisterio(serviciosPorMinisterio);
+
+        return ResponseEntity.ok(stats);
+      } catch (Exception e) {
+        LOGGER.error("Error al obtener stats del dashboard", e);
+        return ResponseEntity.status(500).body("Error al obtener estadísticas: " + e.getMessage());
       }
     }
   }

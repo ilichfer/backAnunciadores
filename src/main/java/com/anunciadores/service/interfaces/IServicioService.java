@@ -1,4 +1,4 @@
-package  com.anunciadores.service.interfaces;
+package com.anunciadores.service.interfaces;
 
 import com.anunciadores.dto.CoordinadorDTO;
 import com.anunciadores.dto.ItemCombo;
@@ -13,6 +13,8 @@ import com.anunciadores.dto.ServicioResponseDto;
 import com.anunciadores.model.Coordinador;
 import com.anunciadores.model.Ministerio;
 import com.anunciadores.model.Persona;
+import com.anunciadores.model.Servicio;
+
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -102,9 +104,15 @@ public interface IServicioService {
   
   Persona getPersonDuplicate(ServicioDto paramServicioDto);
   
-  ProgramationDto findNextServices(Date paramDate) throws ParseException;
-  
-  ProgramationDto findServices(Date paramDate) throws ParseException;
+ProgramationDto findNextServices(Date paramDate) throws ParseException;
+
+   ProgramationDto findServices(Date paramDate) throws ParseException;
+
+   List<Servicio> getServiciosProximosPersona(int idPersona, Date fechaActual, Date fechaLimite);
+
+   List<Servicio> getServiciosMesPersona(int idPersona, Date inicioMes, Date finMes);
+
+   List<Object[]> getServiciosPorMinisterio(int idPersona, Date inicioMes, Date finMes);
 }
 
 

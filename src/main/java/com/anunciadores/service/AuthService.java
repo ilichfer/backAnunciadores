@@ -59,7 +59,7 @@
 /* 59 */     String rol = (rolP.getIdRol() == 1) ? "ADMIN" : "USER";
 /*    */ 
 /*    */     
-/* 62 */     String nombreCompleto = persona.getNombre() + " " + persona.getNombre();
+/* 62 */     String nombreCompleto = persona.getNombre() + " " + persona.getApellido();
 /* 63 */     String token = this.jwtService.generarToken(
 /* 64 */         String.valueOf(persona.getDocumento()), rol, nombreCompleto);
 /*    */ 
