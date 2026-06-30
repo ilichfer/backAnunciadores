@@ -12,6 +12,7 @@ import com.anunciadores.service.UsuarioService;
 import com.anunciadores.service.interfaces.*;
 import com.anunciadores.util.UtilDate;
 import com.anunciadores.model.Notificacion;
+import com.anunciadores.dto.ImagenMensualDto;
   import com.fasterxml.jackson.core.JsonProcessingException;
   import com.fasterxml.jackson.databind.JsonMappingException;
 
@@ -98,6 +99,9 @@ import org.springframework.web.bind.annotation.*;
 
     @Autowired
     private INotificacionService notificacionService;
+
+    @Autowired
+    private IImagenMensualService imagenMensualService;
 
     List<Persona> personasList;
     List<PersonaDto> personasListDto;
@@ -594,6 +598,179 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
     public ResponseEntity<PersonaDto> consutarEmail(@RequestParam String email) throws JsonMappingException, JsonProcessingException {
         PersonaDto person = this.personaService.buscarEmail(email);
         return new ResponseEntity(person, null, HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping({"/notificaciones/{idPersona}/count"})
+    public ResponseEntity<?> getCountNoLeidas(@PathVariable Integer idPersona) {
+      try {
+        Integer count = this.notificacionService.countNotificacionesNoLeidas(idPersona);
+        return ResponseEntity.ok(count);
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al contar notificaciones: " + e.getMessage());
+      }
+    }
+
+    @DeleteMapping({"/notificaciones/{idPersona}/limpiar/{dias}"})
+    public ResponseEntity<?> limpiarNotificaciones(@PathVariable Integer idPersona, @PathVariable Integer dias) {
+      try {
+        this.notificacionService.eliminarNotificacionesAntiguas(idPersona, dias);
+        return ResponseEntity.ok(true);
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al limpiar notificaciones: " + e.getMessage());
+      }
+    }
+
+    @GetMapping({"/imagen-mensual/{tipo}"})
+    public ResponseEntity<?> getImagenMensual(@PathVariable String tipo) {
+      try {
+        ImagenMensualDto dto = imagenMensualService.getImagenActual(tipo);
+        if (dto == null) {
+          return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No hay imagen disponible para: " + tipo);
+        }
+        return ResponseEntity.ok(dto);
+      } catch (Exception e) {
+        LOGGER.error("Error al obtener imagen mensual", e);
+        return ResponseEntity.status(500).body("Error al obtener imagen mensual");
+      }
+    }
+
+    @PostMapping({"/imagen-mensual/upload"})
+    public ResponseEntity<?> uploadImagenMensual(
+        @RequestParam("image") MultipartFile file,
+        @RequestParam(value = "mes", required = false) Integer mes,
+        @RequestParam(value = "anio", required = false) Integer anio,
+        @RequestParam(value = "tipo", defaultValue = "tcd") String tipo) {
+      try {
+        if (file.isEmpty()) {
+          return ResponseEntity.badRequest().body("El archivo es requerido");
+        }
+
+        String imageUrl = r2UploadService.uploadImage(file);
+        if (imageUrl == null) {
+          return ResponseEntity.status(500).body("Error al subir la imagen a Cloudflare R2");
+        }
+
+        if (mes == null) {
+          mes = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH) + 1;
+        }
+        if (anio == null) {
+          anio = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
+        }
+
+        com.anunciadores.model.ImagenMensual guardada = imagenMensualService.guardarImagen(imageUrl, mes, anio, tipo);
+        if (guardada == null) {
+          return ResponseEntity.status(500).body("Error al guardar el registro en la base de datos");
+        }
+
+        LOGGER.info("Imagen mensual guardada: tipo={}, mes={}, anio={}, url={}", tipo, mes, anio, imageUrl);
+        return ResponseEntity.ok(new ImagenMensualDto(guardada.getUrl(), guardada.getMes(), guardada.getAnio(), guardada.getTipo()));
+      } catch (java.io.IOException e) {
+        LOGGER.error("Error de IO al subir imagen mensual", e);
+        return ResponseEntity.status(500).body("Error al procesar el archivo: " + e.getMessage());
+      } catch (Exception e) {
+        LOGGER.error("Error al guardar imagen mensual", e);
+        return ResponseEntity.status(500).body("Error al guardar imagen mensual");
+      }
+    }
+
+    @GetMapping({"/dashboard/stats/{idPersona}"})
+    public ResponseEntity<?> getDashboardStats(@PathVariable Integer idPersona) {
+      try {
+        com.anunciadores.dto.DashboardStatsDto stats = new com.anunciadores.dto.DashboardStatsDto();
+
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        Date fechaActual = utilDate.cargarfechaActualBogotaDate();
+
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+        cal.set(java.util.Calendar.MINUTE, 59);
+        cal.set(java.util.Calendar.SECOND, 59);
+        Date fechaLimite7dias = cal.getTime();
+
+        cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        cal.set(java.util.Calendar.MINUTE, 0);
+        cal.set(java.util.Calendar.SECOND, 0);
+        Date inicioMes = cal.getTime();
+
+        cal.set(java.util.Calendar.DAY_OF_MONTH, cal.getActualMaximum(java.util.Calendar.DAY_OF_MONTH));
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+        cal.set(java.util.Calendar.MINUTE, 59);
+        cal.set(java.util.Calendar.SECOND, 59);
+        Date finMes = cal.getTime();
+
+        List<Servicio> serviciosProximos = servicioService.getServiciosProximosPersona(idPersona, fechaActual, fechaLimite7dias);
+        stats.setServiciosProximos(serviciosProximos.size());
+
+        List<Servicio> serviciosMes = servicioService.getServiciosMesPersona(idPersona, inicioMes, finMes);
+        stats.setServiciosDelMes(serviciosMes.size());
+
+        int totalServiciosMes = serviciosMes.size();
+        int serviciosAsistidos = 0;
+        for (Servicio s : serviciosMes) {
+          if ("ASISTIO".equalsIgnoreCase(s.getAsistencia())) {
+            serviciosAsistidos++;
+          }
+        }
+        stats.setTotalServiciosMes(totalServiciosMes);
+        int porcentaje = totalServiciosMes > 0 ? (serviciosAsistidos * 100) / totalServiciosMes : 0;
+        stats.setPorcentajeCumplimiento(porcentaje);
+
+        Integer countNotif = notificacionService.countNotificacionesNoLeidas(idPersona);
+        stats.setNotificacionesPendientes(countNotif != null ? countNotif : 0);
+
+        List<com.anunciadores.model.Tdc> tdcHoy = tdcService.getTdcByFechaAndPersonaList(fechaActual, idPersona);
+        stats.setTcdSubidoHoy(tdcHoy != null && !tdcHoy.isEmpty());
+
+        List<com.anunciadores.dto.PersonaDto> cumpleaneros = personaService.findBirthdayByMonth();
+        int proximosCumples = 0;
+        java.util.Calendar calCumple = java.util.Calendar.getInstance();
+        int diaHoy = calCumple.get(java.util.Calendar.DAY_OF_MONTH);
+        int mesHoy = calCumple.get(java.util.Calendar.MONTH);
+        for (com.anunciadores.dto.PersonaDto p : cumpleaneros) {
+          if (p.getFechanacimiento() != null) {
+            try {
+              String[] partes = p.getFechanacimiento().split("/");
+              if (partes.length >= 2) {
+                int diaCumple = Integer.parseInt(partes[0]);
+                if (diaCumple >= diaHoy && diaCumple <= diaHoy + 7) {
+                  proximosCumples++;
+                }
+              }
+            } catch (Exception ex) {}
+          }
+        }
+        stats.setProximosCumpleanos(proximosCumples);
+
+        List<com.anunciadores.dto.ProximoServicioDto> proximosServicios = new java.util.ArrayList<>();
+        for (Servicio s : serviciosProximos) {
+          if (s.getFechaServicio() != null) {
+            String fechaStr = new java.text.SimpleDateFormat("yyyy-MM-dd").format(s.getFechaServicio());
+            String nombreMinisterio = "";
+            if (s.getIdMinisterio() > 0) {
+              com.anunciadores.model.Ministerio min = servicioService.findByidMnisterio(s.getIdMinisterio());
+              if (min != null) {
+                nombreMinisterio = min.getNombre();
+              }
+            }
+            proximosServicios.add(new com.anunciadores.dto.ProximoServicioDto(fechaStr, "", nombreMinisterio, ""));
+          }
+        }
+        stats.setProximosServicios(proximosServicios);
+
+        List<Object[]> serviciosPorMin = servicioService.getServiciosPorMinisterio(idPersona, inicioMes, finMes);
+        List<com.anunciadores.dto.ServicioPorMinisterioDto> serviciosPorMinisterio = new java.util.ArrayList<>();
+        for (Object[] row : serviciosPorMin) {
+          String nombreMin = row[0] != null ? row[0].toString() : "";
+          int cantidad = row[1] != null ? ((Number) row[1]).intValue() : 0;
+          serviciosPorMinisterio.add(new com.anunciadores.dto.ServicioPorMinisterioDto(nombreMin, cantidad));
+        }
+        stats.setServiciosPorMinisterio(serviciosPorMinisterio);
+
+        return ResponseEntity.ok(stats);
+      } catch (Exception e) {
+        LOGGER.error("Error al obtener stats del dashboard", e);
+        return ResponseEntity.status(500).body("Error al obtener estadísticas: " + e.getMessage());
+      }
     }
 
     @GetMapping({"/consutarDoc"})
