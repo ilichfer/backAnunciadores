@@ -103,6 +103,9 @@ import org.springframework.web.bind.annotation.*;
     @Autowired
     private IImagenMensualService imagenMensualService;
 
+    @Autowired
+    private IContactoService contactoService;
+
     List<Persona> personasList;
     List<PersonaDto> personasListDto;
     
@@ -770,6 +773,57 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
       } catch (Exception e) {
         LOGGER.error("Error al obtener stats del dashboard", e);
         return ResponseEntity.status(500).body("Error al obtener estadísticas: " + e.getMessage());
+      }
+    }
+
+    @PostMapping({"/contacto"})
+    public ResponseEntity<?> guardarContacto(@RequestBody ContactoRequestDto request) {
+      try {
+        ContactoDto resultado = contactoService.guardar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+      } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+      } catch (Exception e) {
+        LOGGER.error("Error al guardar contacto", e);
+        return ResponseEntity.status(500).body("Error al procesar el mensaje");
+      }
+    }
+
+    @GetMapping({"/contacto"})
+    public ResponseEntity<?> listarContactos(
+        @RequestParam(value = "soloNoLeidos", defaultValue = "false") boolean soloNoLeidos) {
+      try {
+        if (soloNoLeidos) {
+          return ResponseEntity.ok(contactoService.listarNoLeidos());
+        }
+        return ResponseEntity.ok(contactoService.listarTodos());
+      } catch (Exception e) {
+        LOGGER.error("Error al listar contactos", e);
+        return ResponseEntity.status(500).body("Error al obtener mensajes");
+      }
+    }
+
+    @PutMapping({"/contacto/{id}/leer"})
+    public ResponseEntity<?> marcarContactoLeido(@PathVariable Integer id) {
+      try {
+        ContactoDto resultado = contactoService.marcarLeido(id);
+        return ResponseEntity.ok(resultado);
+      } catch (IllegalArgumentException e) {
+        return ResponseEntity.status(404).body(e.getMessage());
+      } catch (Exception e) {
+        LOGGER.error("Error al marcar contacto como leído", e);
+        return ResponseEntity.status(500).body("Error al actualizar mensaje");
+      }
+    }
+
+    @GetMapping({"/contacto/no-leidos/count"})
+    public ResponseEntity<?> contarContactosNoLeidos() {
+      try {
+        long count = contactoService.contarNoLeidos();
+        return ResponseEntity.ok(count);
+      } catch (Exception e) {
+        LOGGER.error("Error al contar contactos no leídos", e);
+        return ResponseEntity.status(500).body(0L);
       }
     }
 
