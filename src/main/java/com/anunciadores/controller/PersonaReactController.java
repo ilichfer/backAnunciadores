@@ -31,7 +31,7 @@ import java.util.Date;
   import org.springframework.format.annotation.DateTimeFormat;
   import org.springframework.http.HttpStatus;
   import org.springframework.http.ResponseEntity;
-  import org.springframework.stereotype.Controller;
+  import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
  
  
@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.*;
   import org.springframework.web.server.ResponseStatusException;
   
   @CrossOrigin(origins = {"*"}, allowedHeaders = {"*"})
-  @Controller
+  @RestController
   @RequestMapping({"/api"})
   public class PersonaReactController {
 /*  41 */   private Logger LOGGER = LoggerFactory.getLogger(com.anunciadores.controller.PersonaReactController.class);
@@ -389,32 +389,6 @@ import org.springframework.web.bind.annotation.*;
      return rp;
     }
 
-      @PostMapping({"/updatecordinador"})
-      public ResponseEntity<?> updateordinador(@RequestBody CoordinadorDTO cordinador) {
-          ResponseEntity<?> rp;
-          try {
-              Coordinador corSave = this.servicioService.findCoordinadorByFecha(this.utilDate.convertStringToDate(cordinador.getFechaString()));
-              if (corSave != null) {
-                  Boolean response = this.servicioService.updateCoordinador(corSave,cordinador.getIdPersona());
-                  if (response.booleanValue()) {
-                      rp = new ResponseEntity(Boolean.TRUE, null, HttpStatus.ACCEPTED);
-                  } else {
-
-                      rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar cordinador");
-                  }
-
-              } else {
-
-                  rp = ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(false, "Ya existe una programación para esta fecha y ministerio."));
-              }
-          } catch (Exception e) {
-
-              rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar cordinador");
-          }
-          return rp;
-      }
-  
-    
     @GetMapping({"/findSchedule"})
     public ResponseEntity<?> consultarMiProgramacion(@RequestParam String fecha, @RequestParam int idMinisterio) throws JsonMappingException, JsonProcessingException, ParseException {
       ResponseEntity<?> rp;
@@ -491,21 +465,6 @@ import org.springframework.web.bind.annotation.*;
 /* 425 */       rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("no hay cumpleaños hoy");
       } 
 /* 427 */     return rp;
-    }
-    
-    @GetMapping({"/reporteTdcIndividual"})
-    public ResponseEntity<?> reporteTdcPersona(@RequestParam int idPersona) throws ParseException {
-      ResponseEntity<?> rp;
-/* 433 */     List<TdcDto> listTCD = this.tdcService.findAlltcdByPersona(idPersona);
-  
-      
-/* 436 */     if (listTCD.size() > 0) {
-/* 437 */       rp = new ResponseEntity(listTCD, null, HttpStatus.ACCEPTED);
-      } else {
-        
-/* 440 */       rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("no hay reporte");
-      } 
-/* 442 */     return rp;
     }
     
     @GetMapping({"/findBirthDaysMOnth"})
@@ -607,16 +566,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
       }
     }
 
-    @GetMapping({"/notificaciones/{idPersona}/count"})
-    public ResponseEntity<?> getCountNoLeidas(@PathVariable Integer idPersona) {
-      try {
-        Integer count = this.notificacionService.countNotificacionesNoLeidas(idPersona);
-        return ResponseEntity.ok(count);
-      } catch (Exception e) {
-        return ResponseEntity.status(500).body("Error al contar notificaciones: " + e.getMessage());
-      }
-    }
-
     @PutMapping({"/notificaciones/{id}/leida"})
     public ResponseEntity<?> marcarLeida(@PathVariable Integer id) {
       try {
@@ -637,6 +586,27 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.ok(true);
       } catch (Exception e) {
         return ResponseEntity.status(500).body("Error al marcar notificaciones: " + e.getMessage());
+      }
+    }
+
+    @GetMapping({"/buscar/{id}"})
+    public ResponseEntity<Object> getPersonaById(@PathVariable Integer id) {
+        return ResponseEntity.ok(this.personaService.findPersonaById(id));
+    }
+
+    @GetMapping({"/consutarEmail"})
+    public ResponseEntity<PersonaDto> consutarEmail(@RequestParam String email) throws JsonMappingException, JsonProcessingException {
+        PersonaDto person = this.personaService.buscarEmail(email);
+        return new ResponseEntity(person, null, HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping({"/notificaciones/{idPersona}/count"})
+    public ResponseEntity<?> getCountNoLeidas(@PathVariable Integer idPersona) {
+      try {
+        Integer count = this.notificacionService.countNotificacionesNoLeidas(idPersona);
+        return ResponseEntity.ok(count);
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("Error al contar notificaciones: " + e.getMessage());
       }
     }
 
@@ -706,7 +676,7 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
     @GetMapping({"/dashboard/stats/{idPersona}"})
     public ResponseEntity<?> getDashboardStats(@PathVariable Integer idPersona) {
       try {
-        DashboardStatsDto stats = new DashboardStatsDto();
+        com.anunciadores.dto.DashboardStatsDto stats = new com.anunciadores.dto.DashboardStatsDto();
 
         java.util.Calendar cal = java.util.Calendar.getInstance();
         Date fechaActual = utilDate.cargarfechaActualBogotaDate();
@@ -748,15 +718,15 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         Integer countNotif = notificacionService.countNotificacionesNoLeidas(idPersona);
         stats.setNotificacionesPendientes(countNotif != null ? countNotif : 0);
 
-        List<Tdc> tdcHoy = tdcService.getTdcByFechaAndPersonaList(fechaActual, idPersona);
+        List<com.anunciadores.model.Tdc> tdcHoy = tdcService.getTdcByFechaAndPersonaList(fechaActual, idPersona);
         stats.setTcdSubidoHoy(tdcHoy != null && !tdcHoy.isEmpty());
 
-        List<PersonaDto> cumpleaneros = personaService.findBirthdayByMonth();
+        List<com.anunciadores.dto.PersonaDto> cumpleaneros = personaService.findBirthdayByMonth();
         int proximosCumples = 0;
         java.util.Calendar calCumple = java.util.Calendar.getInstance();
         int diaHoy = calCumple.get(java.util.Calendar.DAY_OF_MONTH);
         int mesHoy = calCumple.get(java.util.Calendar.MONTH);
-        for (PersonaDto p : cumpleaneros) {
+        for (com.anunciadores.dto.PersonaDto p : cumpleaneros) {
           if (p.getFechanacimiento() != null) {
             try {
               String[] partes = p.getFechanacimiento().split("/");
@@ -771,33 +741,28 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         }
         stats.setProximosCumpleanos(proximosCumples);
 
-        List<ProximoServicioDto> proximosServicios = new java.util.ArrayList<>();
+        List<com.anunciadores.dto.ProximoServicioDto> proximosServicios = new java.util.ArrayList<>();
         for (Servicio s : serviciosProximos) {
           if (s.getFechaServicio() != null) {
-            String fechaStr = new SimpleDateFormat("yyyy-MM-dd").format(s.getFechaServicio());
-            String horaStr = "";
-            try {
-              horaStr = s.getFechaServicio().toString().split(" ")[3];
-            } catch (Exception ex) {}
+            String fechaStr = new java.text.SimpleDateFormat("yyyy-MM-dd").format(s.getFechaServicio());
             String nombreMinisterio = "";
-            String nombrePosicion = "";
             if (s.getIdMinisterio() > 0) {
-              Ministerio min = servicioService.findByidMnisterio(s.getIdMinisterio());
+              com.anunciadores.model.Ministerio min = servicioService.findByidMnisterio(s.getIdMinisterio());
               if (min != null) {
                 nombreMinisterio = min.getNombre();
               }
             }
-            proximosServicios.add(new ProximoServicioDto(fechaStr, horaStr, nombreMinisterio, nombrePosicion));
+            proximosServicios.add(new com.anunciadores.dto.ProximoServicioDto(fechaStr, "", nombreMinisterio, ""));
           }
         }
         stats.setProximosServicios(proximosServicios);
 
         List<Object[]> serviciosPorMin = servicioService.getServiciosPorMinisterio(idPersona, inicioMes, finMes);
-        List<ServicioPorMinisterioDto> serviciosPorMinisterio = new java.util.ArrayList<>();
+        List<com.anunciadores.dto.ServicioPorMinisterioDto> serviciosPorMinisterio = new java.util.ArrayList<>();
         for (Object[] row : serviciosPorMin) {
           String nombreMin = row[0] != null ? row[0].toString() : "";
           int cantidad = row[1] != null ? ((Number) row[1]).intValue() : 0;
-          serviciosPorMinisterio.add(new ServicioPorMinisterioDto(nombreMin, cantidad));
+          serviciosPorMinisterio.add(new com.anunciadores.dto.ServicioPorMinisterioDto(nombreMin, cantidad));
         }
         stats.setServiciosPorMinisterio(serviciosPorMinisterio);
 
@@ -806,6 +771,18 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         LOGGER.error("Error al obtener stats del dashboard", e);
         return ResponseEntity.status(500).body("Error al obtener estadísticas: " + e.getMessage());
       }
+    }
+
+    @GetMapping({"/consutarDoc"})
+    public ResponseEntity<PersonaDto> consutarDoc(@RequestParam int doc) throws JsonMappingException, JsonProcessingException, ParseException {
+        PersonaDto person = this.personaService.buscarByDocumento(Integer.valueOf(doc));
+        List<ServicioListResponseDto> listProgramacionMinisterio = this.servicioService.findProgramacionByDateGroup(this.utilDate.cargarfechaActualBogotaDate());
+        if (listProgramacionMinisterio.size() > 0) {
+            person.setCoordinadorActual(this.servicioService.validateCoordinadorByFechaAndIdPersona(listProgramacionMinisterio.get(0).getFechaServcio(), person.getId()).booleanValue());
+        } else {
+            person.setCoordinadorActual(false);
+        }
+        return new ResponseEntity(person, null, HttpStatus.ACCEPTED);
     }
   }
 
