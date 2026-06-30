@@ -667,7 +667,7 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
 
         LOGGER.info("Imagen mensual guardada: tipo={}, mes={}, anio={}, url={}", tipo, mes, anio, imageUrl);
         return ResponseEntity.ok(new ImagenMensualDto(guardada.getUrl(), guardada.getMes(), guardada.getAnio(), guardada.getTipo()));
-      } catch (java.io.IOException e) {
+      } catch (IOException e) {
         LOGGER.error("Error de IO al subir imagen mensual", e);
         return ResponseEntity.status(500).body("Error al procesar el archivo: " + e.getMessage());
       } catch (Exception e) {
