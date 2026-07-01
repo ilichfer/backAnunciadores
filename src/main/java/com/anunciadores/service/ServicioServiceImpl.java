@@ -647,6 +647,7 @@ Date finalFechaActual = fechaActual;
                             corDto.setName(cord.getPersona().getNombre());
                             corDto.setDate(ld);
                             corDto.setId(cord.getPersona().getId().intValue());
+                            corDto.setNotasServicio(cord.getNotasServicio());
                             prog.setCoordinator(corDto);
                         }
                         List<MinistryMember> menbers = new ArrayList<>();
@@ -696,15 +697,16 @@ Date finalFechaActual = fechaActual;
                     }
                     LocalDate ld = LocalDate.parse(fechaReactActualStr, dtf);
                     prog.setDate(ld);
-                    Coordinador cord = this.coordinadorRepo.findByFechaServicio(finalFechaActual);
-                    if (cord != null) {
-                        CordinatorDto corDto = new CordinatorDto();
-                        corDto.setName(cord.getPersona().getNombre());
-                        corDto.setDate(ld);
-                        prog.setCoordinator(corDto);
-                    }
-                    List<MinistryMember> menbers = new ArrayList<>();
-                    List<Object> resp = this.servicioRepository.findMInisteriesAndpositions(finalFechaActual, (Integer) min);
+                        Coordinador cord = this.coordinadorRepo.findByFechaServicio(finalFechaActual);
+                        if (cord != null) {
+                            CordinatorDto corDto = new CordinatorDto();
+                            corDto.setName(cord.getPersona().getNombre());
+                            corDto.setDate(ld);
+                            corDto.setNotasServicio(cord.getNotasServicio());
+                            prog.setCoordinator(corDto);
+                        }
+                        List<MinistryMember> menbers = new ArrayList<>();
+                        List<Object> resp = this.servicioRepository.findMInisteriesAndpositions(finalFechaActual, (Integer) min);
                     if (resp != null && resp.size() > 0) {
                         List<MinistryMember> positions = new ArrayList<>();
                         MinistryDto mDto = new MinistryDto();
