@@ -20,9 +20,7 @@
   import com.anunciadores.model.inscripcionConsolidacion;
   import com.anunciadores.repository.*;
 
-  import java.math.BigInteger;
-  import java.security.MessageDigest;
-  import java.security.NoSuchAlgorithmException;
+  import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
   import java.time.LocalDate;
   import java.time.ZoneId;
   import java.time.ZonedDateTime;
@@ -130,12 +128,13 @@
     public Persona save(Persona persona) {
 /* 120 */     RolPersona rolPersona = new RolPersona();
 /* 121 */     persona.setPassword(encriptar(persona.getPassword()));
+        persona.setPasswordHashVersion(1);
 /* 122 */     Persona personaSave = (Persona)this.personaRepository.save(persona);
-      
+       
 /* 124 */     rolPersona.setIdPersona(personaSave.getId().intValue());
 /* 125 */     rolPersona.setIdRol(2);
 /* 126 */     this.rolesPersonaRepository.save(rolPersona);
-      
+       
 /* 128 */     return personaSave;
     }
   
@@ -490,20 +489,10 @@
     }
   
     
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     public String encriptar(String Pass) {
-      try {
-/* 484 */       MessageDigest md = MessageDigest.getInstance("MD5");
-/* 485 */       byte[] messageDigest = md.digest(Pass.getBytes());
-/* 486 */       BigInteger number = new BigInteger(1, messageDigest);
-/* 487 */       String hashtext = number.toString(16);
-        
-/* 489 */       while (hashtext.length() < 32) {
-/* 490 */         hashtext = "0" + hashtext;
-        }
-/* 492 */       return hashtext;
-/* 493 */     } catch (NoSuchAlgorithmException e) {
-/* 494 */       throw new RuntimeException(e);
-      } 
+        return passwordEncoder.encode(Pass);
     }
   
     
@@ -528,6 +517,7 @@
     
     public Persona savePassword(Persona persona) {
 /* 519 */     persona.setPassword(encriptar(persona.getPassword()));
+        persona.setPasswordHashVersion(1);
 /* 520 */     return (Persona)this.personaRepository.save(persona);
     }
   

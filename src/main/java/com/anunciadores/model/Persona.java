@@ -66,6 +66,8 @@
     private String email;
     @Column(name = "password")
     private String password;
+    @Column(name = "password_hash_version")
+    private Integer passwordHashVersion = 0;
     @Column(name = "genero")
     private String genero;
     @Column(name = "estado_civil")
@@ -177,6 +179,14 @@
     
     public void setPassword(String password) {
 /* 179 */     this.password = password;
+    }
+
+    public Integer getPasswordHashVersion() {
+        return passwordHashVersion;
+    }
+
+    public void setPasswordHashVersion(Integer passwordHashVersion) {
+        this.passwordHashVersion = passwordHashVersion;
     }
     
     public String getGenero() {
