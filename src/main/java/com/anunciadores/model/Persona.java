@@ -1,5 +1,4 @@
   package  com.anunciadores.model;
-  
   import java.io.Serializable;
   import javax.persistence.Column;
   import javax.persistence.Entity;
@@ -7,39 +6,6 @@
   import javax.persistence.GenerationType;
   import javax.persistence.Id;
   import javax.persistence.Table;
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   @Entity
   @Table(name = "persona")
   public class Persona
@@ -108,266 +74,196 @@
     private Boolean consolidacion;
     @Column(name = "estado")
     private Boolean estado;
-    
     public Integer getId() {
-/* 111 */     return this.id;
+return this.id;
     }
-    
     public void setId(Integer id) {
-/* 115 */     this.id = id;
+this.id = id;
     }
-    
     public String getNombre() {
-/* 119 */     return this.nombre;
+return this.nombre;
     }
-    
     public void setNombre(String nombre) {
-/* 123 */     this.nombre = nombre;
+this.nombre = nombre;
     }
-    
     public String getApellido() {
-/* 127 */     return this.apellido;
+return this.apellido;
     }
-    
     public void setApellido(String apellido) {
-/* 131 */     this.apellido = apellido;
+this.apellido = apellido;
     }
-    
     public Integer getDocumento() {
-/* 135 */     return this.documento;
+return this.documento;
     }
-    
     public void setDocumento(Integer documento) {
-/* 139 */     this.documento = documento;
+this.documento = documento;
     }
-    
     public String getTelefono() {
-/* 143 */     return this.telefono;
+return this.telefono;
     }
-    
     public void setTelefono(String telefono) {
-/* 147 */     this.telefono = telefono;
+this.telefono = telefono;
     }
-    
     public String getFechanacimiento() {
-/* 151 */     return this.fechanacimiento;
+return this.fechanacimiento;
     }
-    
     public void setFechanacimiento(String fechanacimiento) {
-/* 155 */     this.fechanacimiento = fechanacimiento;
+this.fechanacimiento = fechanacimiento;
     }
-    
     public String getTipodocumento() {
-/* 159 */     return this.tipodocumento;
+return this.tipodocumento;
     }
-    
     public void setTipodocumento(String tipodocumento) {
-/* 163 */     this.tipodocumento = tipodocumento;
+this.tipodocumento = tipodocumento;
     }
-    
     public String getEmail() {
-/* 167 */     return this.email;
+return this.email;
     }
-    
     public void setEmail(String email) {
-/* 171 */     this.email = email;
+this.email = email;
     }
-    
     public String getPassword() {
-/* 175 */     return this.password;
+return this.password;
     }
-    
     public void setPassword(String password) {
-/* 179 */     this.password = password;
+this.password = password;
     }
-
     public Integer getPasswordHashVersion() {
         return passwordHashVersion;
     }
-
     public void setPasswordHashVersion(Integer passwordHashVersion) {
         this.passwordHashVersion = passwordHashVersion;
     }
-    
     public String getGenero() {
-/* 183 */     return this.genero;
+return this.genero;
     }
-    
     public void setGenero(String genero) {
-/* 187 */     this.genero = genero;
+this.genero = genero;
     }
-    
     public String getEstadoCivil() {
-/* 191 */     return this.estadoCivil;
+return this.estadoCivil;
     }
-    
     public void setEstadoCivil(String estadoCivil) {
-/* 195 */     this.estadoCivil = estadoCivil;
+this.estadoCivil = estadoCivil;
     }
-    
     public String getPaisNacimiento() {
-/* 199 */     return this.paisNacimiento;
+return this.paisNacimiento;
     }
-    
     public void setPaisNacimiento(String paisNacimiento) {
-/* 203 */     this.paisNacimiento = paisNacimiento;
+this.paisNacimiento = paisNacimiento;
     }
-    
     public String getCiudad() {
-/* 207 */     return this.ciudad;
+return this.ciudad;
     }
-    
     public void setCiudad(String ciudad) {
-/* 211 */     this.ciudad = ciudad;
+this.ciudad = ciudad;
     }
-    
     public Boolean getDiscapacidad() {
-/* 215 */     return this.discapacidad;
+return this.discapacidad;
     }
-    
     public void setDiscapacidad(Boolean discapacidad) {
-/* 219 */     this.discapacidad = discapacidad;
+this.discapacidad = discapacidad;
     }
-    
     public Boolean getPerteneceMinoria() {
-/* 223 */     return this.perteneceMinoria;
+return this.perteneceMinoria;
     }
-    
     public void setPerteneceMinoria(Boolean perteneceMinoria) {
-/* 227 */     this.perteneceMinoria = perteneceMinoria;
+this.perteneceMinoria = perteneceMinoria;
     }
-    
     public boolean isDiscapacidad() {
-/* 231 */     return this.discapacidad.booleanValue();
+return this.discapacidad.booleanValue();
     }
-    
     public void setDiscapacidad(boolean discapacidad) {
-/* 235 */     this.discapacidad = Boolean.valueOf(discapacidad);
+this.discapacidad = Boolean.valueOf(discapacidad);
     }
-    
     public String getDescDiscapacidad() {
-/* 239 */     return this.descDiscapacidad;
+return this.descDiscapacidad;
     }
-    
     public void setDescDiscapacidad(String descDiscapacidad) {
-/* 243 */     this.descDiscapacidad = descDiscapacidad;
+this.descDiscapacidad = descDiscapacidad;
     }
-    
     public boolean isPerteneceMinoria() {
-/* 247 */     return this.perteneceMinoria.booleanValue();
+return this.perteneceMinoria.booleanValue();
     }
-    
     public void setPerteneceMinoria(boolean perteneceMinoria) {
-/* 251 */     this.perteneceMinoria = Boolean.valueOf(perteneceMinoria);
+this.perteneceMinoria = Boolean.valueOf(perteneceMinoria);
     }
-    
     public String getDescMinoria() {
-/* 255 */     return this.descMinoria;
+return this.descMinoria;
     }
-    
     public void setDescMinoria(String descMinoria) {
-/* 259 */     this.descMinoria = descMinoria;
+this.descMinoria = descMinoria;
     }
-    
     public String getDireccion() {
-/* 263 */     return this.direccion;
+return this.direccion;
     }
-    
     public void setDireccion(String direccion) {
-/* 267 */     this.direccion = direccion;
+this.direccion = direccion;
     }
-    
     public String getCiudadDeptoDireccion() {
-/* 271 */     return this.ciudadDeptoDireccion;
+return this.ciudadDeptoDireccion;
     }
-    
     public void setCiudadDeptoDireccion(String ciudadDeptoDireccion) {
-/* 275 */     this.ciudadDeptoDireccion = ciudadDeptoDireccion;
+this.ciudadDeptoDireccion = ciudadDeptoDireccion;
     }
-    
     public String getCelular() {
-/* 279 */     return this.celular;
+return this.celular;
     }
-    
     public void setCelular(String celular) {
-/* 283 */     this.celular = celular;
+this.celular = celular;
     }
-    
     public String getOcupacion() {
-/* 287 */     return this.ocupacion;
+return this.ocupacion;
     }
-    
     public void setOcupacion(String ocupacion) {
-/* 291 */     this.ocupacion = ocupacion;
+this.ocupacion = ocupacion;
     }
-    
     public String getEscolaridad() {
-/* 295 */     return this.escolaridad;
+return this.escolaridad;
     }
-    
     public void setEscolaridad(String escolaridad) {
-/* 299 */     this.escolaridad = escolaridad;
+this.escolaridad = escolaridad;
     }
-    
     public String getFechaConvercionCristo() {
-/* 303 */     return this.fechaConvercionCristo;
+return this.fechaConvercionCristo;
     }
-    
     public void setFechaConvercionCristo(String fechaConvercionCristo) {
-/* 307 */     this.fechaConvercionCristo = fechaConvercionCristo;
+this.fechaConvercionCristo = fechaConvercionCristo;
     }
-    
     public String getFechaLlegadaAdc() {
-/* 311 */     return this.fechaLlegadaAdc;
+return this.fechaLlegadaAdc;
     }
-    
     public void setFechaLlegadaAdc(String fechaLlegadaAdc) {
-/* 315 */     this.fechaLlegadaAdc = fechaLlegadaAdc;
+this.fechaLlegadaAdc = fechaLlegadaAdc;
     }
-    
     public String getFechaBautizo() {
-/* 319 */     return this.fechaBautizo;
+return this.fechaBautizo;
     }
-    
     public void setFechaBautizo(String fechaBautizo) {
-/* 323 */     this.fechaBautizo = fechaBautizo;
+this.fechaBautizo = fechaBautizo;
     }
-    
     public String getFechaBautizoEspiritu() {
-/* 327 */     return this.fechaBautizoEspiritu;
+return this.fechaBautizoEspiritu;
     }
-    
     public void setFechaBautizoEspiritu(String fechaBautizoEspiritu) {
-/* 331 */     this.fechaBautizoEspiritu = fechaBautizoEspiritu;
+this.fechaBautizoEspiritu = fechaBautizoEspiritu;
     }
-    
     public Boolean getConsolidacion() {
-/* 335 */     return this.consolidacion;
+return this.consolidacion;
     }
-    
     public void setConsolidacion(Boolean consolidacion) {
-/* 339 */     this.consolidacion = consolidacion;
+this.consolidacion = consolidacion;
     }
-    
     public Boolean getEstado() {
-/* 343 */     return this.estado;
+return this.estado;
     }
-    
     public void setEstado(Boolean estado) {
-/* 347 */     this.estado = estado;
+this.estado = estado;
     }
-    
     public String getIdTelegram() {
-/* 351 */     return this.idTelegram;
+return this.idTelegram;
     }
-    
     public void setIdTelegram(String idTelegram) {
-/* 355 */     this.idTelegram = idTelegram;
+this.idTelegram = idTelegram;
     }
   }
-
-
-/* Location:              C:\Users\Asus VivoBook\.m2\repository\com\anunciadores\anunciadores\0.0.1-SNAPSHOT\ROOT.war!\WEB-INF\classes\com\anunciadores\model\Persona.class
- * Java compiler version: 11 (55.0)
- * JD-Core Version:       1.1.3
- */
