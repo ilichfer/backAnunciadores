@@ -14,6 +14,7 @@ import com.anunciadores.util.UtilDate;
 import com.anunciadores.model.Notificacion;
 import com.anunciadores.model.Rol;
 import com.anunciadores.dto.ImagenMensualDto;
+import com.anunciadores.dto.RegisterPersonaRequestDto;
   import com.fasterxml.jackson.core.JsonProcessingException;
   import com.fasterxml.jackson.databind.JsonMappingException;
   import java.io.IOException;
@@ -388,6 +389,44 @@ return rp;
       } catch (Exception e) {
         LOGGER.error("Error al cambiar rol", e);
         return ResponseEntity.status(500).body("Error al cambiar rol: " + e.getMessage());
+      }
+    }
+    @PostMapping({"/personas/register"})
+    public ResponseEntity<?> registerPersona(@RequestBody RegisterPersonaRequestDto request) {
+      try {
+        Persona persona = new Persona();
+        persona.setNombre(request.getNombre());
+        persona.setApellido(request.getApellido());
+        persona.setDocumento(request.getDocumento());
+        persona.setTipodocumento(request.getTipodocumento());
+        persona.setFechanacimiento(request.getFechanacimiento());
+        persona.setGenero(request.getGenero());
+        persona.setEstadoCivil(request.getEstadoCivil());
+        persona.setEmail(request.getEmail());
+        persona.setTelefono(request.getTelefono());
+        persona.setCelular(request.getCelular());
+        persona.setDireccion(request.getDireccion());
+        persona.setCiudadDeptoDireccion(request.getCiudadDeptoDireccion());
+        persona.setPaisNacimiento(request.getPaisNacimiento());
+        persona.setCiudad(request.getCiudad());
+        persona.setOcupacion(request.getOcupacion());
+        persona.setEscolaridad(request.getEscolaridad());
+        persona.setFechaConvercionCristo(request.getFechaConvercionCristo());
+        persona.setFechaLlegadaAdc(request.getFechaLlegadaAdc());
+        persona.setFechaBautizo(request.getFechaBautizo());
+        persona.setFechaBautizoEspiritu(request.getFechaBautizoEspiritu());
+        persona.setDiscapacidad(request.getDiscapacidad());
+        persona.setDescDiscapacidad(request.getDescDiscapacidad());
+        persona.setPerteneceMinoria(request.getPerteneceMinoria());
+        persona.setDescMinoria(request.getDescMinoria());
+        persona.setConsolidacion(request.getConsolidacion());
+        persona.setPassword(request.getPassword());
+        persona.setEstado(true);
+        Persona saved = personaService.save(persona);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+      } catch (Exception e) {
+        LOGGER.error("Error al registrar persona", e);
+        return ResponseEntity.status(500).body("Error al registrar persona: " + e.getMessage());
       }
     }
     @GetMapping({"/findTcdPerson"})
