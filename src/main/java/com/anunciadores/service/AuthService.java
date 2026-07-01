@@ -1,5 +1,4 @@
 package com.anunciadores.service;
-
 import com.anunciadores.auth.dto.LoginRequest;
 import com.anunciadores.auth.dto.LoginResponse;
 import com.anunciadores.model.Persona;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 @Service
 public class AuthService
 {
@@ -25,9 +23,7 @@ public class AuthService
   private JwtService jwtService;
   @Autowired
   private IRolesPersonaRepo rolesPersonaRepo;
-
   private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
   @Transactional
   public LoginResponse login(LoginRequest request) {
     Integer cedula;
@@ -36,18 +32,14 @@ public class AuthService
     } catch (NumberFormatException e) {
       throw new RuntimeException("La cédula debe ser un número válido");
     }
-
     Persona persona = this.personaRepo.findByDocumento(cedula);
     if (persona == null) {
       throw new RuntimeException("Cédula o contraseña incorrectos");
     }
-
     if (persona.getEstado() == null || !persona.getEstado().booleanValue()) {
       throw new RuntimeException("Tu cuenta está inactiva. Contacta al administrador.");
     }
-
     boolean passwordValido;
-
     if (persona.getPasswordHashVersion() != null && persona.getPasswordHashVersion() == 1) {
       passwordValido = passwordEncoder.matches(request.getPassword(), persona.getPassword());
     } else {
@@ -60,22 +52,17 @@ public class AuthService
         personaRepo.save(persona);
       }
     }
-
     if (!passwordValido) {
       throw new RuntimeException("Cédula o contraseña incorrectos");
     }
-
     List<RolPersona> roldb = this.rolesPersonaRepo.findRolByidPersona(persona.getId().intValue());
     RolPersona rolP = roldb.get(0);
     String rol = (rolP.getIdRol() == 1) ? "ADMIN" : "USER";
-
     String nombreCompleto = persona.getNombre() + " " + persona.getApellido();
     String token = this.jwtService.generarToken(
         String.valueOf(persona.getDocumento()), rol, nombreCompleto);
-
     return new LoginResponse(token, rol, nombreCompleto, Long.valueOf(persona.getId().longValue()));
   }
-
   private String toMd5(String input) {
     try {
       MessageDigest md = MessageDigest.getInstance("MD5");
@@ -91,9 +78,3 @@ public class AuthService
     }
   }
 }
-
-
-/* Location:              C:\Users\Asus VivoBook\.m2\repository\com\anunciadores\anunciadores\0.0.1-SNAPSHOT\ROOT.war!\WEB-INF\classes\com\anunciadores\service\AuthService.class
- * Java compiler version: 11 (55.0)
- * JD-Core Version:       1.1.3
- */

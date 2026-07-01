@@ -1,5 +1,4 @@
 package com.anunciadores.service;
-
 import com.anunciadores.dto.ContactoDto;
 import com.anunciadores.dto.ContactoRequestDto;
 import com.anunciadores.model.Contacto;
@@ -15,18 +14,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 @Service
 public class ContactoServiceImpl implements IContactoService {
     private final Logger log = LoggerFactory.getLogger(ContactoServiceImpl.class);
-
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
         "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
     );
-
     @Autowired
     private IContactoRepo contactoRepo;
-
     @Override
     @Transactional
     public ContactoDto guardar(ContactoRequestDto request) {
@@ -45,7 +40,6 @@ public class ContactoServiceImpl implements IContactoService {
         if (request.getMensaje() == null || request.getMensaje().trim().isEmpty()) {
             throw new IllegalArgumentException("El mensaje es requerido");
         }
-
         Contacto contacto = new Contacto();
         contacto.setNombre(request.getNombre().trim());
         contacto.setEmail(request.getEmail().trim());
@@ -53,12 +47,10 @@ public class ContactoServiceImpl implements IContactoService {
         contacto.setMensaje(request.getMensaje().trim());
         contacto.setLeido(false);
         contacto.setFechaCreacion(new Date());
-
         Contacto guardado = contactoRepo.save(contacto);
         log.info("Nuevo contacto guardado: id={}, nombre={}, email={}", guardado.getId(), guardado.getNombre(), guardado.getEmail());
         return entityToDto(guardado);
     }
-
     @Override
     public List<ContactoDto> listarTodos() {
         return contactoRepo.findAllByOrderByFechaCreacionDesc()
@@ -66,7 +58,6 @@ public class ContactoServiceImpl implements IContactoService {
             .map(this::entityToDto)
             .collect(Collectors.toList());
     }
-
     @Override
     public List<ContactoDto> listarNoLeidos() {
         return contactoRepo.findByLeidoFalseOrderByFechaCreacionDesc()
@@ -74,7 +65,6 @@ public class ContactoServiceImpl implements IContactoService {
             .map(this::entityToDto)
             .collect(Collectors.toList());
     }
-
     @Override
     @Transactional
     public ContactoDto marcarLeido(Integer id) {
@@ -87,12 +77,10 @@ public class ContactoServiceImpl implements IContactoService {
         Contacto actualizado = contactoRepo.save(contacto);
         return entityToDto(actualizado);
     }
-
     @Override
     public long contarNoLeidos() {
         return contactoRepo.countByLeidoFalse();
     }
-
     private ContactoDto entityToDto(Contacto entity) {
         return new ContactoDto(
             entity.getId(),

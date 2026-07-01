@@ -1,31 +1,5 @@
   package  com.anunciadores.dto;
-  
   import java.io.Serializable;
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   public class Clientes
     implements Serializable
   {
@@ -38,91 +12,58 @@
     private String celular;
     private String direccion;
     private String email;
-    
     public String getPrimerNombre() {
-/*  43 */     return this.primerNombre;
+return this.primerNombre;
     }
-    
     public void setPrimerNombre(String primerNombre) {
-/*  47 */     this.primerNombre = primerNombre;
+this.primerNombre = primerNombre;
     }
-    
     public String getSegundoNombre() {
-/*  51 */     return this.segundoNombre;
+return this.segundoNombre;
     }
-    
     public void setSegundoNombre(String segundoNombre) {
-/*  55 */     this.segundoNombre = segundoNombre;
+this.segundoNombre = segundoNombre;
     }
-    
     public String getPrimerApellido() {
-/*  59 */     return this.primerApellido;
+return this.primerApellido;
     }
-    
     public void setPrimerApellido(String primerApellido) {
-/*  63 */     this.primerApellido = primerApellido;
+this.primerApellido = primerApellido;
     }
-    
     public String getSegundoApellido() {
-/*  67 */     return this.segundoApellido;
+return this.segundoApellido;
     }
-    
     public void setSegundoApellido(String segundoApellido) {
-/*  71 */     this.segundoApellido = segundoApellido;
+this.segundoApellido = segundoApellido;
     }
-    
     public String getCelular() {
-/*  75 */     return this.celular;
+return this.celular;
     }
-    
     public void setCelular(String celular) {
-/*  79 */     this.celular = celular;
+this.celular = celular;
     }
-    
     public String getDireccion() {
-/*  83 */     return this.direccion;
+return this.direccion;
     }
-    
     public void setDireccion(String direccion) {
-/*  87 */     this.direccion = direccion;
+this.direccion = direccion;
     }
-    
     public String getEmail() {
-/*  91 */     return this.email;
+return this.email;
     }
-    
     public void setEmail(String email) {
-/*  95 */     this.email = email;
+this.email = email;
     }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-    
     public String getTipoDocumento() {
-/* 108 */     return this.tipoDocumento;
+return this.tipoDocumento;
     }
-    
     public void setTipoDocumento(String tipoDocumento) {
-/* 112 */     this.tipoDocumento = tipoDocumento;
+this.tipoDocumento = tipoDocumento;
     }
-    
     public int getDocumento() {
-/* 116 */     return this.Documento;
+return this.Documento;
     }
-    
     public void setDocumento(int documento) {
-/* 120 */     this.Documento = documento;
+this.Documento = documento;
     }
   }
-
-
-/* Location:              C:\Users\Asus VivoBook\.m2\repository\com\anunciadores\anunciadores\0.0.1-SNAPSHOT\ROOT.war!\WEB-INF\classes\com\anunciadores\dto\Clientes.class
- * Java compiler version: 11 (55.0)
- * JD-Core Version:       1.1.3
- */

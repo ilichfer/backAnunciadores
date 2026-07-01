@@ -1,5 +1,4 @@
 package com.anunciadores.scheduler;
-
 import com.anunciadores.model.Notificacion;
 import com.anunciadores.model.Persona;
 import com.anunciadores.repository.INotificacionRepo;
@@ -14,20 +13,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
 @Component
 public class NotificationScheduler {
     private static final Logger log = LoggerFactory.getLogger(NotificationScheduler.class);
-
     @Autowired
     private INotificacionService notificacionService;
-
     @Autowired
     private IPersonaRepo personaRepo;
-
     @Autowired
     private UtilDate utilDate;
-
     /**
      * Recordatorio para servicios del día siguiente.
      * Se ejecuta automáticamente a las 8:00 AM todos los días.
@@ -51,21 +45,17 @@ public class NotificationScheduler {
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DAY_OF_MONTH, 1);
             Date fechaManana = cal.getTime();
-
             List<Notificacion> notificaciones = notificacionService.getNotificacionesPendientesPorFecha(fechaManana);
             for (Notificacion n : notificaciones) {
                 Persona persona = personaRepo.findById(n.getIdPersona()).orElse(null);
-
                 // Solo envía si la persona tiene idTelegram configurado
                 if (persona != null && persona.getIdTelegram() != null && !persona.getIdTelegram().isEmpty()) {
                     String mensaje = "⏰ RECORDATORIO: Tienes servicio mañana " +
                         formatFecha(fechaManana) + " como " + n.getPosicion() +
                         " en " + n.getMinisterio();
-
                     // // Aquí iría la integración real con Telegram:
                     // // telegramService.enviarMensaje(persona.getIdTelegram(), mensaje);
                     // log.info("Enviando recordatorio Telegram a {}: {}", persona.getNombre(), mensaje);
-
                     // Marcar como enviada para no volver a enviar
                     n.setEnviada(true);
                     notificacionService.marcarEnviada(n.getId());
@@ -76,7 +66,6 @@ public class NotificationScheduler {
             log.error("Error al enviar recordatorios: ", e);
         }
     }
-
     /**
      * Notificación para servicios del día actual.
      * Se ejecuta automáticamente a las 9:00 AM todos los días.
@@ -100,16 +89,13 @@ public class NotificationScheduler {
             List<Notificacion> notificaciones = notificacionService.getNotificacionesPendientesPorFecha(fechaHoy);
             for (Notificacion n : notificaciones) {
                 Persona persona = personaRepo.findById(n.getIdPersona()).orElse(null);
-
                 // Solo envía si la persona tiene idTelegram configurado
                 if (persona != null && persona.getIdTelegram() != null && !persona.getIdTelegram().isEmpty()) {
                     String mensaje = "🔔 TU SERVICIO HOY: " + n.getPosicion() +
                         " en " + n.getMinisterio();
-
                     // // Aquí iría la integración real con Telegram:
                     // // telegramService.enviarMensaje(persona.getIdTelegram(), mensaje);
                     // log.info("Enviando notificación Telegram a {}: {}", persona.getNombre(), mensaje);
-
                     // Marcar como enviada para no volver a enviar
                     n.setEnviada(true);
                     notificacionService.marcarEnviada(n.getId());
@@ -120,7 +106,6 @@ public class NotificationScheduler {
             log.error("Error al enviar notificaciones del día: ", e);
         }
     }
-
     private String formatFecha(Date fecha) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(fecha);

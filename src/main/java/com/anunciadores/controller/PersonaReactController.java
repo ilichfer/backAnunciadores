@@ -14,9 +14,9 @@ import com.anunciadores.util.UtilDate;
 import com.anunciadores.model.Notificacion;
 import com.anunciadores.model.Rol;
 import com.anunciadores.dto.ImagenMensualDto;
+import com.anunciadores.dto.RegisterPersonaRequestDto;
   import com.fasterxml.jackson.core.JsonProcessingException;
   import com.fasterxml.jackson.databind.JsonMappingException;
-
   import java.io.IOException;
   import java.text.ParseException;
   import java.text.SimpleDateFormat;
@@ -25,7 +25,6 @@ import java.time.ZoneId;
 import java.util.Date;
   import java.util.List;
   import javax.servlet.http.HttpServletRequest;
-
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
   import org.springframework.beans.factory.annotation.Autowired;
@@ -34,256 +33,188 @@ import java.util.Date;
   import org.springframework.http.ResponseEntity;
   import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
- 
- 
- 
- 
   import org.springframework.web.multipart.MultipartFile;
   import org.springframework.web.server.ResponseStatusException;
-  
   @CrossOrigin(origins = {"*"}, allowedHeaders = {"*"})
   @RestController
   @RequestMapping({"/api"})
   public class PersonaReactController {
-/*  41 */   private Logger LOGGER = LoggerFactory.getLogger(com.anunciadores.controller.PersonaReactController.class);
-    
+private Logger LOGGER = LoggerFactory.getLogger(com.anunciadores.controller.PersonaReactController.class);
     @Autowired
     private IPersonaService personaService;
-    
     @Autowired
     private IMenuService menuService;
-    
     @Autowired
     private UsuarioService usuarioService;
-    
     @Autowired
     private ICursoService cursoService;
-    
     @Autowired
     private IBibliaService bibliaService;
-    
     @Autowired
     private IPersonaRepo personaRepoImpl;
-    
     @Autowired
     private ConsolidacionRepoImpl consolidacionDao;
-    
     @Autowired
     private IPagoService pagoService;
-    
     @Autowired
     private IServicioService servicioService;
-    
     @Autowired
     private IMInisteryService ministeryService;
-    
     @Autowired
     private IRolesRepo rolesPersonaRepo;
-    
     @Autowired
     private IPermisosRepo permisosMenuRepo;
-    
     @Autowired
     private IParamMenuRepo paramMenuRepo;
-    
     @Autowired
     private IRolesRepo rolesDao;
-
     @Autowired
     private UtilDate utilDate;
-    
     @Autowired
     private IR2UploadService r2UploadService;
-    
     @Autowired
     private ITdcService tdcService;
-
     @Autowired
     private INotificacionService notificacionService;
-
     @Autowired
     private IImagenMensualService imagenMensualService;
-
     @Autowired
     private IContactoService contactoService;
-
     List<Persona> personasList;
     List<PersonaDto> personasListDto;
-    
     @GetMapping({"/users"})
     public ResponseEntity<List<PersonaReactDto>> users() throws JsonMappingException, JsonProcessingException, ParseException {
-/*  98 */     ResponseEntity<List<PersonaReactDto>> rp = null;
-/*  99 */     List<PersonaReactDto> listResult = this.personaService.findAllUsers();
-/* 100 */     if (listResult.size() > 0) {
-/* 101 */       rp = new ResponseEntity(listResult, null, HttpStatus.ACCEPTED);
+ResponseEntity<List<PersonaReactDto>> rp = null;
+List<PersonaReactDto> listResult = this.personaService.findAllUsers();
+if (listResult.size() > 0) {
+rp = new ResponseEntity(listResult, null, HttpStatus.ACCEPTED);
       } else {
-/* 103 */       rp = new ResponseEntity(listResult, null, HttpStatus.INTERNAL_SERVER_ERROR);
+rp = new ResponseEntity(listResult, null, HttpStatus.INTERNAL_SERVER_ERROR);
       } 
-      
-/* 106 */     return rp;
+return rp;
     }
-    
     @GetMapping({"/events"})
     public ResponseEntity<ProgramationDto> events() throws JsonMappingException, JsonProcessingException, ParseException {
-/* 111 */     ResponseEntity<ProgramationDto> rp = null;
-/* 112 */     ProgramationDto result = this.servicioService.findNextServices(this.utilDate.cargarfechaActualBogotaDate());
-      
-/* 114 */     if (result != null && result.getMinistries() != null && result.getMinistries().size() > 0) {
-/* 115 */       rp = new ResponseEntity(result, null, HttpStatus.ACCEPTED);
+ResponseEntity<ProgramationDto> rp = null;
+ProgramationDto result = this.servicioService.findNextServices(this.utilDate.cargarfechaActualBogotaDate());
+if (result != null && result.getMinistries() != null && result.getMinistries().size() > 0) {
+rp = new ResponseEntity(result, null, HttpStatus.ACCEPTED);
       } else {
-/* 117 */       rp = new ResponseEntity(result, null, HttpStatus.INTERNAL_SERVER_ERROR);
+rp = new ResponseEntity(result, null, HttpStatus.INTERNAL_SERVER_ERROR);
       } 
-/* 119 */     return rp;
+return rp;
     }
-    
     @GetMapping({"/findprog"})
     public ResponseEntity<ProgramationDto> findprog(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws JsonMappingException, JsonProcessingException, ParseException {
-/* 124 */     ResponseEntity<ProgramationDto> rp = null;
-      
-/* 126 */     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-/* 127 */     Date fechaD = sdf.parse(date);
-/* 128 */     ProgramationDto result = this.servicioService.findServices(fechaD);
-      
-/* 130 */     if (result != null && result.getMinistries() != null && result.getMinistries().size() > 0) {
-/* 131 */       rp = new ResponseEntity(result, null, HttpStatus.ACCEPTED);
+ResponseEntity<ProgramationDto> rp = null;
+SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+Date fechaD = sdf.parse(date);
+ProgramationDto result = this.servicioService.findServices(fechaD);
+if (result != null && result.getMinistries() != null && result.getMinistries().size() > 0) {
+rp = new ResponseEntity(result, null, HttpStatus.ACCEPTED);
       } else {
-        
-/* 134 */       rp = new ResponseEntity(result, null, HttpStatus.INTERNAL_SERVER_ERROR);
+rp = new ResponseEntity(result, null, HttpStatus.INTERNAL_SERVER_ERROR);
       } 
-/* 136 */     return rp;
+return rp;
     }
-  
-    
     @GetMapping({"/ministries"})
     public ResponseEntity<List<Ministry>> ministries() throws JsonMappingException, JsonProcessingException, ParseException {
-/* 142 */     ResponseEntity<List<Ministry>> rp = null;
-/* 143 */     List<Ministry> listServResult = this.ministeryService.getAllministriesWithPositions();
-      
-/* 145 */     if (listServResult.size() > 0) {
-/* 146 */       rp = new ResponseEntity(listServResult, null, HttpStatus.ACCEPTED);
+ResponseEntity<List<Ministry>> rp = null;
+List<Ministry> listServResult = this.ministeryService.getAllministriesWithPositions();
+if (listServResult.size() > 0) {
+rp = new ResponseEntity(listServResult, null, HttpStatus.ACCEPTED);
       } else {
-/* 148 */       rp = new ResponseEntity(listServResult, null, HttpStatus.INTERNAL_SERVER_ERROR);
+rp = new ResponseEntity(listServResult, null, HttpStatus.INTERNAL_SERVER_ERROR);
       } 
-/* 150 */     return rp;
+return rp;
     }
-  
-    
     @GetMapping({"/ministries/{idMinistry}"})
     public ResponseEntity<Ministry> getMinistries(@PathVariable Integer idMinistry) throws JsonMappingException, JsonProcessingException, ParseException {
-/* 156 */     ResponseEntity<Ministry> rp = null;
-/* 157 */     Ministry minResult = this.ministeryService.getMinistryWithPositions(idMinistry);
-      
-/* 159 */     if (minResult != null && minResult.getPositions() != null && minResult.getPositions().size() > 0) {
-/* 160 */       rp = new ResponseEntity(minResult, null, HttpStatus.ACCEPTED);
+ResponseEntity<Ministry> rp = null;
+Ministry minResult = this.ministeryService.getMinistryWithPositions(idMinistry);
+if (minResult != null && minResult.getPositions() != null && minResult.getPositions().size() > 0) {
+rp = new ResponseEntity(minResult, null, HttpStatus.ACCEPTED);
       } else {
-/* 162 */       rp = new ResponseEntity(minResult, null, HttpStatus.INTERNAL_SERVER_ERROR);
+rp = new ResponseEntity(minResult, null, HttpStatus.INTERNAL_SERVER_ERROR);
       } 
-/* 164 */     return rp;
+return rp;
     }
-  
-  
-    
     @GetMapping({"/ministries/{id}/personas"})
     public ResponseEntity<?> getPersonasByMinisterio(@PathVariable Integer id) {
       try {
-/* 172 */       List<PersonaDto> personas = this.servicioService.findPersonaByidMnisterio(id.intValue());
-/* 173 */       return ResponseEntity.ok(personas);
-/* 174 */     } catch (Exception e) {
-/* 175 */       return ResponseEntity.status(500)
-/* 176 */         .body("Error al obtener personas del ministerio: " + e.getMessage());
+List<PersonaDto> personas = this.servicioService.findPersonaByidMnisterio(id.intValue());
+return ResponseEntity.ok(personas);
+} catch (Exception e) {
+return ResponseEntity.status(500)
+.body("Error al obtener personas del ministerio: " + e.getMessage());
       } 
     }
-  
-    
     @PostMapping({"/ministries/addposition"})
     public ResponseEntity<?> addPositionToMinistrie(@RequestBody PosicionDto posicionDto) {
       try {
-/* 184 */       this.servicioService.savePosicion(posicionDto); return ResponseEntity.noContent().build();
-/* 185 */     } catch (ResponseStatusException e) {
-/* 186 */       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getReason());
+this.servicioService.savePosicion(posicionDto); return ResponseEntity.noContent().build();
+} catch (ResponseStatusException e) {
+return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getReason());
       } 
     }
-  
-  
-  
-    
     @GetMapping({"/user"})
     public ResponseEntity<?> getUsuarioLogueado(HttpServletRequest request) {
       try {
-/* 196 */       String authHeader = request.getHeader("Authorization");
-/* 197 */       if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-/* 198 */         return ResponseEntity.status(401).body("Token no proporcionado");
+String authHeader = request.getHeader("Authorization");
+if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+return ResponseEntity.status(401).body("Token no proporcionado");
         }
-/* 200 */       String token = authHeader.substring(7);
-        
-/* 202 */       UserResponseDto user = this.personaService.getUsuarioDesdeToken(token);
-/* 203 */       return ResponseEntity.ok(user);
+String token = authHeader.substring(7);
+UserResponseDto user = this.personaService.getUsuarioDesdeToken(token);
+return ResponseEntity.ok(user);
       }
-/* 205 */     catch (Exception e) {
-/* 206 */       return ResponseEntity.status(401).body("Token inválido o expirado");
+catch (Exception e) {
+return ResponseEntity.status(401).body("Token inválido o expirado");
       } 
     }
-  
-  
-    
     @GetMapping({"/schedule/persona/{id}"})
     public ResponseEntity<?> getProgramacionPersona(@PathVariable Integer id) {
       try {
-/* 215 */       List<ServicioResponseDto> listServ = this.servicioService.buscarProgramacionMes(id.intValue());
-/* 216 */       return ResponseEntity.ok(listServ);
-/* 217 */     } catch (Exception e) {
-/* 218 */       return ResponseEntity.status(500)
-/* 219 */         .body("Error al obtener programación: " + e.getMessage());
+List<ServicioResponseDto> listServ = this.servicioService.buscarProgramacionMes(id.intValue());
+return ResponseEntity.ok(listServ);
+} catch (Exception e) {
+return ResponseEntity.status(500)
+.body("Error al obtener programación: " + e.getMessage());
       } 
     }
-  
-  
-    
     @DeleteMapping({"/ministeries/{idMinisterio}/personas/{idPersona}"})
     public ResponseEntity<?> deletePersonaFromMinisterie(@PathVariable int idMinisterio, @PathVariable int idPersona) {
-/* 227 */     ResponseEntity<List<PersonaDto>> rp = null;
-  
-      
-/* 230 */     this.personaService.eliminarPersonaMinisterio(idPersona, idMinisterio);
-/* 231 */     List<PersonaDto> personasList = this.servicioService.findPersonaByidMnisterio(idMinisterio);
-      
-/* 233 */     if (personasList.size() > 0) {
-/* 234 */       rp = new ResponseEntity(personasList, null, HttpStatus.ACCEPTED);
+ResponseEntity<List<PersonaDto>> rp = null;
+this.personaService.eliminarPersonaMinisterio(idPersona, idMinisterio);
+List<PersonaDto> personasList = this.servicioService.findPersonaByidMnisterio(idMinisterio);
+if (personasList.size() > 0) {
+rp = new ResponseEntity(personasList, null, HttpStatus.ACCEPTED);
       } else {
-/* 236 */       rp = new ResponseEntity(personasList, null, HttpStatus.INTERNAL_SERVER_ERROR);
+rp = new ResponseEntity(personasList, null, HttpStatus.INTERNAL_SERVER_ERROR);
       } 
-/* 238 */     return rp;
+return rp;
     }
-  
-    
     @PostMapping({"/ministeries/addperson"})
     public ResponseEntity<?> addPersonaToMinisterie(@RequestBody AddPersonaRequest request) {
       try {
-/* 245 */       this.ministeryService.agregarPersonasAMinisterio(request.getIdPersona().intValue(), request.getIdMinisterio().intValue());
-/* 246 */       return ResponseEntity.noContent().build();
-/* 247 */     } catch (ResponseStatusException e) {
-/* 248 */       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getReason());
+this.ministeryService.agregarPersonasAMinisterio(request.getIdPersona().intValue(), request.getIdMinisterio().intValue());
+return ResponseEntity.noContent().build();
+} catch (ResponseStatusException e) {
+return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getReason());
       } 
     }
-  
-    
     @PostMapping({"/updateprog"})
     public ResponseEntity<?> updateprog(@RequestBody updateServiceRequest request) {
       try {
-/* 256 */       System.out.println("entro ");
-/* 257 */       this.ministeryService.updateService(request);
-/* 258 */       return ResponseEntity.noContent().build();
-/* 259 */     } catch (ResponseStatusException e) {
-/* 260 */       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getReason());
-/* 261 */     } catch (ParseException e) {
-/* 262 */       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
+System.out.println("entro ");
+this.ministeryService.updateService(request);
+return ResponseEntity.noContent().build();
+} catch (ResponseStatusException e) {
+return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getReason());
+} catch (ParseException e) {
+return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
       } 
     }
-  
-  
-  
-  
-    
     @PostMapping({"/upload"})
     public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile file, @RequestParam("idPersona") Integer idPersona) throws ParseException {
         ResponseEntity<String> rp = null;
@@ -296,72 +227,50 @@ import org.springframework.web.bind.annotation.*;
         );
         try {
             boolean tcd = tdcService.getTdcByFechaAndPersona(utilDate.cargarfechaActualBogotaDate(),idPersona);
-
             if (tcd ) {
                 String imageUrl = this.r2UploadService.uploadImage(file);
-
-                /* 276 */
-                ImagenDiariaDto imagen = new ImagenDiariaDto();
-                /* 277 */
-                imagen.setIdPersona(idPersona.intValue());
-                /* 278 */
-                imagen.setFechaCreacion(LocalDate.now());
-                /* 279 */
-                imagen.setTdc(imageUrl);
-
-                /* 281 */
-                this.tdcService.saveTcdImage(imageUrl, idPersona);
-
-                /* 283 */
-                return ResponseEntity.ok(imageUrl);
+ImagenDiariaDto imagen = new ImagenDiariaDto();
+imagen.setIdPersona(idPersona.intValue());
+imagen.setFechaCreacion(LocalDate.now());
+imagen.setTdc(imageUrl);
+this.tdcService.saveTcdImage(imageUrl, idPersona);
+return ResponseEntity.ok(imageUrl);
             }
             rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("tcd ya cargado para hoy "+ utilDate.cargarfechaActualBogotaString());
-
-            /* 285 */
-        } catch (IOException e) {
+} catch (IOException e) {
             rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-
         } catch (ParseException e) {
             rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
         return rp;
     }
-
-
         @PostMapping({"/scheduleByDate"})
     public ResponseEntity<?> scheduleByDate(@RequestBody reporRequest request) throws ParseException {
-/* 294 */     ResponseEntity<List<TdcReporteDto>> rp = null;
-/* 295 */     if (request.getFechaInicio() != null && request.getFechaFin() != null) {
-/* 296 */       System.out.println("Fecha Inicio: " + request.getFechaInicio());
-/* 297 */       List<TdcReporteDto> listaTdc = this.tdcService.findAllBetweenDates(this.utilDate.convertStringToDate(request.getFechaInicio()), this.utilDate.convertStringToDate(request.getFechaFin()));
-        
-/* 299 */       if (listaTdc.size() > 0) {
-/* 300 */         rp = new ResponseEntity(listaTdc, null, HttpStatus.ACCEPTED);
+ResponseEntity<List<TdcReporteDto>> rp = null;
+if (request.getFechaInicio() != null && request.getFechaFin() != null) {
+System.out.println("Fecha Inicio: " + request.getFechaInicio());
+List<TdcReporteDto> listaTdc = this.tdcService.findAllBetweenDates(this.utilDate.convertStringToDate(request.getFechaInicio()), this.utilDate.convertStringToDate(request.getFechaFin()));
+if (listaTdc.size() > 0) {
+rp = new ResponseEntity(listaTdc, null, HttpStatus.ACCEPTED);
         } else {
-/* 302 */         rp = new ResponseEntity(listaTdc, null, HttpStatus.INTERNAL_SERVER_ERROR);
+rp = new ResponseEntity(listaTdc, null, HttpStatus.INTERNAL_SERVER_ERROR);
         } 
       } 
-/* 305 */     return rp;
+return rp;
     }
-  
-  
-    
     @GetMapping({"/tdcbyPerson/{idPersona}"})
     public ResponseEntity<?> tdcbyPerson(@PathVariable Integer idPersona) throws ParseException {
-/* 312 */     ResponseEntity<TdcReporteDto> rp = null;
-/* 313 */     if (idPersona != null) {
-/* 314 */       TdcReporteDto Tdc = this.tdcService.findAllBetweenDatesAndPerson(idPersona);
-        
-/* 316 */       if (Tdc != null && Tdc.getIdPersona() != 0) {
-/* 317 */         rp = new ResponseEntity(Tdc, null, HttpStatus.ACCEPTED);
+ResponseEntity<TdcReporteDto> rp = null;
+if (idPersona != null) {
+TdcReporteDto Tdc = this.tdcService.findAllBetweenDatesAndPerson(idPersona);
+if (Tdc != null && Tdc.getIdPersona() != 0) {
+rp = new ResponseEntity(Tdc, null, HttpStatus.ACCEPTED);
         } else {
-/* 319 */         rp = new ResponseEntity(Tdc, null, HttpStatus.INTERNAL_SERVER_ERROR);
+rp = new ResponseEntity(Tdc, null, HttpStatus.INTERNAL_SERVER_ERROR);
         } 
       } 
-/* 322 */     return rp;
+return rp;
     }
-  
-    
     @PostMapping({"/savecordinador"})
     public ResponseEntity<?> saveCordinador(@RequestBody CoordinadorDTO cordinador) {
       ResponseEntity<?> rp;
@@ -373,132 +282,101 @@ import org.springframework.web.bind.annotation.*;
          if (response.booleanValue()) {
            rp = new ResponseEntity(Boolean.TRUE, null, HttpStatus.ACCEPTED);
           } else {
-            
            rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar cordinador");
           }
-        
         } else {
-
             response = this.servicioService.updateCoordinador(corSave,cordinador.getIdPersona());}
           if (response.booleanValue()) {
               rp = new ResponseEntity(Boolean.TRUE, null, HttpStatus.ACCEPTED);
           } else {
-
               rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar cordinador");
           }
      } catch (Exception e) {
-        
        rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar cordinador");
       } 
      return rp;
     }
-
     @GetMapping({"/findSchedule"})
     public ResponseEntity<?> consultarMiProgramacion(@RequestParam String fecha, @RequestParam int idMinisterio) throws JsonMappingException, JsonProcessingException, ParseException {
       ResponseEntity<?> rp;
-/* 355 */     Date fechaD = this.utilDate.convertStringToDate(fecha);
-/* 356 */     List<ServicioResponseDto> listProgramacionMinisterio = this.servicioService.findProgramacionByDateAndMinisterio(fechaD, idMinisterio);
-      
-/* 358 */     if (listProgramacionMinisterio.size() > 0) {
-        
-/* 360 */       rp = new ResponseEntity(listProgramacionMinisterio, null, HttpStatus.ACCEPTED);
+Date fechaD = this.utilDate.convertStringToDate(fecha);
+List<ServicioResponseDto> listProgramacionMinisterio = this.servicioService.findProgramacionByDateAndMinisterio(fechaD, idMinisterio);
+if (listProgramacionMinisterio.size() > 0) {
+rp = new ResponseEntity(listProgramacionMinisterio, null, HttpStatus.ACCEPTED);
       } else {
-        
-/* 363 */       rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar cordinador");
+rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar cordinador");
       } 
-/* 365 */     return rp;
+return rp;
     }
-  
-  
-    
     @PostMapping({"/updatePassword"})
     public ResponseEntity<?> updatePass(@RequestBody Persona persona) throws JsonMappingException, JsonProcessingException {
-/* 372 */     ResponseEntity<?> rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar contraseña");
-/* 373 */     PersonaDto per = this.personaService.buscarByDocumento(persona.getDocumento());
-/* 374 */     if (per.getEmail() != null) {
-/* 375 */       per.setPassword(persona.getPassword());
-/* 376 */       persona = this.personaService.personaDtoToEntity(per);
-/* 377 */       persona.setEstado(Boolean.valueOf(true));
-/* 378 */       Persona personaSave = this.personaService.savePassword(persona);
-/* 379 */       if (personaSave != null) {
-/* 380 */         rp = new ResponseEntity(personaSave, null, HttpStatus.ACCEPTED);
+ResponseEntity<?> rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar contraseña");
+PersonaDto per = this.personaService.buscarByDocumento(persona.getDocumento());
+if (per.getEmail() != null) {
+per.setPassword(persona.getPassword());
+persona = this.personaService.personaDtoToEntity(per);
+persona.setEstado(Boolean.valueOf(true));
+Persona personaSave = this.personaService.savePassword(persona);
+if (personaSave != null) {
+rp = new ResponseEntity(personaSave, null, HttpStatus.ACCEPTED);
         } else {
-          
-/* 383 */         rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar contraseña");
+rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar contraseña");
         } 
       } 
-/* 386 */     return rp;
+return rp;
     }
-  
-  
-    
     @PostMapping({"/saveInformCoordinator"})
     public ResponseEntity<?> saveInformCoordinator(@RequestBody CoordinadorDTO cordinador) throws ParseException {
       ResponseEntity<?> rp;
       try {
-/* 395 */       SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
-/* 396 */       Persona per = this.personaService.findPersonaById(cordinador.getPersona().getId());
-/* 397 */       cordinador.setPersona(per);
-  
-        
-/* 400 */       Boolean save = this.servicioService.saveCoordinadorEntity(cordinador);
-        
-/* 402 */       if (save.booleanValue()) {
-          
-/* 404 */         rp = ResponseEntity.status(HttpStatus.ACCEPTED).body("informe guardado exitosamente");
+SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
+Persona per = this.personaService.findPersonaById(cordinador.getPersona().getId());
+cordinador.setPersona(per);
+Boolean save = this.servicioService.saveCoordinadorEntity(cordinador);
+if (save.booleanValue()) {
+rp = ResponseEntity.status(HttpStatus.ACCEPTED).body("informe guardado exitosamente");
         } else {
-          
-/* 407 */         rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar informe del coordinador");
+rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar informe del coordinador");
         } 
-/* 409 */     } catch (Exception e) {
-        
-/* 411 */       rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar informe del coordinador");
+} catch (Exception e) {
+rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar informe del coordinador");
       } 
-/* 413 */     return rp;
+return rp;
     }
-    
     @GetMapping({"/findBirthday"})
     public ResponseEntity<?> findBirthday() throws JsonMappingException, JsonProcessingException, ParseException {
       ResponseEntity<?> rp;
-/* 419 */     List<PersonaDto> listadoCumpleanosMes = this.personaService.findBirthdayByMonth();
-/* 420 */     List<PersonaDto> listadoCumpleanosDiario = this.personaService.getBirthDay(listadoCumpleanosMes);
-/* 421 */     if (listadoCumpleanosDiario.size() > 0) {
-/* 422 */       rp = new ResponseEntity(listadoCumpleanosDiario, null, HttpStatus.ACCEPTED);
+List<PersonaDto> listadoCumpleanosMes = this.personaService.findBirthdayByMonth();
+List<PersonaDto> listadoCumpleanosDiario = this.personaService.getBirthDay(listadoCumpleanosMes);
+if (listadoCumpleanosDiario.size() > 0) {
+rp = new ResponseEntity(listadoCumpleanosDiario, null, HttpStatus.ACCEPTED);
       } else {
-        
-/* 425 */       rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("no hay cumpleaños hoy");
+rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("no hay cumpleaños hoy");
       } 
-/* 427 */     return rp;
+return rp;
     }
-    
     @GetMapping({"/findBirthDaysMOnth"})
     public ResponseEntity<?> findBirthDaysMOnth() throws ParseException {
       ResponseEntity<?> rp;
-/* 448 */     List<PersonaDto> listadoCumpleanosMes = this.personaService.findBirthdayByMonth();
-      
-/* 450 */     if (listadoCumpleanosMes.size() > 0) {
-/* 451 */       rp = new ResponseEntity(listadoCumpleanosMes, null, HttpStatus.ACCEPTED);
+List<PersonaDto> listadoCumpleanosMes = this.personaService.findBirthdayByMonth();
+if (listadoCumpleanosMes.size() > 0) {
+rp = new ResponseEntity(listadoCumpleanosMes, null, HttpStatus.ACCEPTED);
       } else {
-        
-/* 454 */       rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("no hay cumpleaños este mes");
+rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("no hay cumpleaños este mes");
       } 
-/* 456 */     return rp;
+return rp;
     }
-  
-    
     @GetMapping({"/personas/{idpersona}/toggle-active"})
     public ResponseEntity<?> toggleActive(@PathVariable Integer idpersona, @RequestParam boolean active) {
       ResponseEntity<?> rp;
-/* 463 */     Persona retorno = this.personaService.toggleActive(idpersona, Boolean.valueOf(active));
-/* 464 */     if (retorno.getId() != null) {
-/* 465 */       rp = new ResponseEntity(retorno, null, HttpStatus.ACCEPTED);
+Persona retorno = this.personaService.toggleActive(idpersona, Boolean.valueOf(active));
+if (retorno.getId() != null) {
+rp = new ResponseEntity(retorno, null, HttpStatus.ACCEPTED);
       } else {
-        
-/* 468 */       rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("so se puedo actualizar el estado del usuario");
+rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("so se puedo actualizar el estado del usuario");
       } 
-/* 470 */     return rp;
+return rp;
     }
-
     @PutMapping({"/personas/{idPersona}/rol"})
     public ResponseEntity<?> cambiarRol(@PathVariable Integer idPersona, @RequestParam Integer idRol) {
       try {
@@ -513,50 +391,76 @@ import org.springframework.web.bind.annotation.*;
         return ResponseEntity.status(500).body("Error al cambiar rol: " + e.getMessage());
       }
     }
-  
-  
-  
-    
+    @PostMapping({"/personas/register"})
+    public ResponseEntity<?> registerPersona(@RequestBody RegisterPersonaRequestDto request) {
+      try {
+        Persona persona = new Persona();
+        persona.setNombre(request.getNombre());
+        persona.setApellido(request.getApellido());
+        persona.setDocumento(request.getDocumento());
+        persona.setTipodocumento(request.getTipodocumento());
+        persona.setFechanacimiento(request.getFechanacimiento());
+        persona.setGenero(request.getGenero());
+        persona.setEstadoCivil(request.getEstadoCivil());
+        persona.setEmail(request.getEmail());
+        persona.setTelefono(request.getTelefono());
+        persona.setCelular(request.getCelular());
+        persona.setDireccion(request.getDireccion());
+        persona.setCiudadDeptoDireccion(request.getCiudadDeptoDireccion());
+        persona.setPaisNacimiento(request.getPaisNacimiento());
+        persona.setCiudad(request.getCiudad());
+        persona.setOcupacion(request.getOcupacion());
+        persona.setEscolaridad(request.getEscolaridad());
+        persona.setFechaConvercionCristo(request.getFechaConvercionCristo());
+        persona.setFechaLlegadaAdc(request.getFechaLlegadaAdc());
+        persona.setFechaBautizo(request.getFechaBautizo());
+        persona.setFechaBautizoEspiritu(request.getFechaBautizoEspiritu());
+        persona.setDiscapacidad(request.getDiscapacidad());
+        persona.setDescDiscapacidad(request.getDescDiscapacidad());
+        persona.setPerteneceMinoria(request.getPerteneceMinoria());
+        persona.setDescMinoria(request.getDescMinoria());
+        persona.setConsolidacion(request.getConsolidacion());
+        persona.setPassword(request.getPassword());
+        persona.setEstado(true);
+        Persona saved = personaService.save(persona);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+      } catch (Exception e) {
+        LOGGER.error("Error al registrar persona", e);
+        return ResponseEntity.status(500).body("Error al registrar persona: " + e.getMessage());
+      }
+    }
     @GetMapping({"/findTcdPerson"})
     public ResponseEntity<?> findTcdPerson(@RequestParam Integer idPersona, @RequestParam String fechaInicio, @RequestParam String fechaFin) throws ParseException {
       ResponseEntity<?> rp;
-/* 479 */     List<TdcDto> listTCD = this.tdcService.findAllBetweenDatesByPersona(this.utilDate.convertStringToDate(fechaInicio), this.utilDate.convertStringToDate(fechaFin), idPersona.intValue());
-      
-/* 481 */     if (listTCD != null && listTCD.size() > 0) {
-/* 482 */       rp = new ResponseEntity(listTCD, null, HttpStatus.ACCEPTED);
+List<TdcDto> listTCD = this.tdcService.findAllBetweenDatesByPersona(this.utilDate.convertStringToDate(fechaInicio), this.utilDate.convertStringToDate(fechaFin), idPersona.intValue());
+if (listTCD != null && listTCD.size() > 0) {
+rp = new ResponseEntity(listTCD, null, HttpStatus.ACCEPTED);
       } else {
-        
-/* 485 */       rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("so se encontro tcd del usuario");
+rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("so se encontro tcd del usuario");
       } 
-/* 487 */     return rp;
+return rp;
     }
-    
     @PostMapping({"/saveService"})
 public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
       ResponseEntity<?> rp;
       try {
         List<Persona> listamultiple = this.servicioService.saveProgram(request);
-
         for (ServiceDTO dto : request) {
           if (dto.getIdPersona() != null && dto.getIdMinisterio() != null) {
             try {
               Integer idPersona = Integer.parseInt(dto.getIdPersona());
               Integer idMinisterio = Integer.parseInt(dto.getIdMinisterio());
               String posicion = dto.getIdPosicion() != null ? servicioService.findPosicion(Integer.valueOf(dto.getIdPosicion())).getNombrePosicion(): "Servicio";
-
               Ministerio min = this.servicioService.findByidMnisterio(idMinisterio);
               String nombreMinisterio = min != null ? min.getNombre() : "Ministerio";
-
               LocalDate fechaLocal = dto.getFechaServicio();
               Date fechaServicio = fechaLocal != null ? Date.from(fechaLocal.atStartOfDay(ZoneId.systemDefault()).toInstant()) : new Date();
-
               this.notificacionService.crearNotificacionAsignacion(idPersona, fechaServicio, idMinisterio, nombreMinisterio, posicion);
             } catch (Exception ex) {
               LOGGER.warn("Error al crear notificación para servicio: ", ex);
             }
           }
         }
-
         rp = new ResponseEntity(listamultiple, null, HttpStatus.ACCEPTED);
       }
       catch (ResponseStatusException e) {
@@ -564,7 +468,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
       }
       return rp;
     }
-
     @GetMapping({"/notificaciones/{idPersona}"})
     public ResponseEntity<?> getNotificaciones(@PathVariable Integer idPersona) {
       try {
@@ -574,7 +477,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al obtener notificaciones: " + e.getMessage());
       }
     }
-
     @GetMapping({"/notificaciones/{idPersona}/no-leidas"})
     public ResponseEntity<?> getNotificacionesNoLeidas(@PathVariable Integer idPersona) {
       try {
@@ -584,7 +486,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al obtener notificaciones: " + e.getMessage());
       }
     }
-
     @PutMapping({"/notificaciones/{id}/leida"})
     public ResponseEntity<?> marcarLeida(@PathVariable Integer id) {
       try {
@@ -597,7 +498,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al marcar notificación: " + e.getMessage());
       }
     }
-
     @PutMapping({"/notificaciones/{idPersona}/leer-todas"})
     public ResponseEntity<?> marcarTodasLeidas(@PathVariable Integer idPersona) {
       try {
@@ -607,18 +507,15 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al marcar notificaciones: " + e.getMessage());
       }
     }
-
     @GetMapping({"/buscar/{id}"})
     public ResponseEntity<Object> getPersonaById(@PathVariable Integer id) {
         return ResponseEntity.ok(this.personaService.findPersonaById(id));
     }
-
     @GetMapping({"/consutarEmail"})
     public ResponseEntity<PersonaDto> consutarEmail(@RequestParam String email) throws JsonMappingException, JsonProcessingException {
         PersonaDto person = this.personaService.buscarEmail(email);
         return new ResponseEntity(person, null, HttpStatus.ACCEPTED);
     }
-
     @GetMapping({"/notificaciones/{idPersona}/count"})
     public ResponseEntity<?> getCountNoLeidas(@PathVariable Integer idPersona) {
       try {
@@ -628,7 +525,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al contar notificaciones: " + e.getMessage());
       }
     }
-
     @DeleteMapping({"/notificaciones/{idPersona}/limpiar/{dias}"})
     public ResponseEntity<?> limpiarNotificaciones(@PathVariable Integer idPersona, @PathVariable Integer dias) {
       try {
@@ -638,7 +534,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al limpiar notificaciones: " + e.getMessage());
       }
     }
-
     @GetMapping({"/imagen-mensual/{tipo}"})
     public ResponseEntity<?> getImagenMensual(@PathVariable String tipo) {
       try {
@@ -652,7 +547,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al obtener imagen mensual");
       }
     }
-
     @PostMapping({"/imagen-mensual/upload"})
     public ResponseEntity<?> uploadImagenMensual(
         @RequestParam("image") MultipartFile file,
@@ -663,24 +557,20 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         if (file.isEmpty()) {
           return ResponseEntity.badRequest().body("El archivo es requerido");
         }
-
         String imageUrl = r2UploadService.uploadImage(file);
         if (imageUrl == null) {
           return ResponseEntity.status(500).body("Error al subir la imagen a Cloudflare R2");
         }
-
         if (mes == null) {
           mes = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH) + 1;
         }
         if (anio == null) {
           anio = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
         }
-
         com.anunciadores.model.ImagenMensual guardada = imagenMensualService.guardarImagen(imageUrl, mes, anio, tipo);
         if (guardada == null) {
           return ResponseEntity.status(500).body("Error al guardar el registro en la base de datos");
         }
-
         LOGGER.info("Imagen mensual guardada: tipo={}, mes={}, anio={}, url={}", tipo, mes, anio, imageUrl);
         return ResponseEntity.ok(new ImagenMensualDto(guardada.getUrl(), guardada.getMes(), guardada.getAnio(), guardada.getTipo()));
       } catch (IOException e) {
@@ -691,38 +581,30 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al guardar imagen mensual");
       }
     }
-
     @GetMapping({"/dashboard/stats/{idPersona}"})
     public ResponseEntity<?> getDashboardStats(@PathVariable Integer idPersona) {
       try {
         com.anunciadores.dto.DashboardStatsDto stats = new com.anunciadores.dto.DashboardStatsDto();
-
         java.util.Calendar cal = java.util.Calendar.getInstance();
         Date fechaActual = utilDate.cargarfechaActualBogotaDate();
-
         cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
         cal.set(java.util.Calendar.MINUTE, 59);
         cal.set(java.util.Calendar.SECOND, 59);
         Date fechaLimite7dias = cal.getTime();
-
         cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
         cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
         cal.set(java.util.Calendar.MINUTE, 0);
         cal.set(java.util.Calendar.SECOND, 0);
         Date inicioMes = cal.getTime();
-
         cal.set(java.util.Calendar.DAY_OF_MONTH, cal.getActualMaximum(java.util.Calendar.DAY_OF_MONTH));
         cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
         cal.set(java.util.Calendar.MINUTE, 59);
         cal.set(java.util.Calendar.SECOND, 59);
         Date finMes = cal.getTime();
-
         List<Servicio> serviciosProximos = servicioService.getServiciosProximosPersona(idPersona, fechaActual, fechaLimite7dias);
         stats.setServiciosProximos(serviciosProximos.size());
-
         List<Servicio> serviciosMes = servicioService.getServiciosMesPersona(idPersona, inicioMes, finMes);
         stats.setServiciosDelMes(serviciosMes.size());
-
         int totalServiciosMes = serviciosMes.size();
         int serviciosAsistidos = 0;
         for (Servicio s : serviciosMes) {
@@ -733,13 +615,10 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         stats.setTotalServiciosMes(totalServiciosMes);
         int porcentaje = totalServiciosMes > 0 ? (serviciosAsistidos * 100) / totalServiciosMes : 0;
         stats.setPorcentajeCumplimiento(porcentaje);
-
         Integer countNotif = notificacionService.countNotificacionesNoLeidas(idPersona);
         stats.setNotificacionesPendientes(countNotif != null ? countNotif : 0);
-
         List<com.anunciadores.model.Tdc> tdcHoy = tdcService.getTdcByFechaAndPersonaList(fechaActual, idPersona);
         stats.setTcdSubidoHoy(tdcHoy != null && !tdcHoy.isEmpty());
-
         List<com.anunciadores.dto.PersonaDto> cumpleaneros = personaService.findBirthdayByMonth();
         int proximosCumples = 0;
         java.util.Calendar calCumple = java.util.Calendar.getInstance();
@@ -759,7 +638,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
           }
         }
         stats.setProximosCumpleanos(proximosCumples);
-
         List<com.anunciadores.dto.ProximoServicioDto> proximosServicios = new java.util.ArrayList<>();
         for (Servicio s : serviciosProximos) {
           if (s.getFechaServicio() != null) {
@@ -775,7 +653,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
           }
         }
         stats.setProximosServicios(proximosServicios);
-
         List<Object[]> serviciosPorMin = servicioService.getServiciosPorMinisterio(idPersona, inicioMes, finMes);
         List<com.anunciadores.dto.ServicioPorMinisterioDto> serviciosPorMinisterio = new java.util.ArrayList<>();
         for (Object[] row : serviciosPorMin) {
@@ -784,14 +661,12 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
           serviciosPorMinisterio.add(new com.anunciadores.dto.ServicioPorMinisterioDto(nombreMin, cantidad));
         }
         stats.setServiciosPorMinisterio(serviciosPorMinisterio);
-
         return ResponseEntity.ok(stats);
       } catch (Exception e) {
         LOGGER.error("Error al obtener stats del dashboard", e);
         return ResponseEntity.status(500).body("Error al obtener estadísticas: " + e.getMessage());
       }
     }
-
     @PostMapping({"/contacto"})
     public ResponseEntity<?> guardarContacto(@RequestBody ContactoRequestDto request) {
       try {
@@ -804,7 +679,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al procesar el mensaje");
       }
     }
-
     @GetMapping({"/contacto"})
     public ResponseEntity<?> listarContactos(
         @RequestParam(value = "soloNoLeidos", defaultValue = "false") boolean soloNoLeidos) {
@@ -818,7 +692,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al obtener mensajes");
       }
     }
-
     @PutMapping({"/contacto/{id}/leer"})
     public ResponseEntity<?> marcarContactoLeido(@PathVariable Integer id) {
       try {
@@ -831,7 +704,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body("Error al actualizar mensaje");
       }
     }
-
     @GetMapping({"/contacto/no-leidos/count"})
     public ResponseEntity<?> contarContactosNoLeidos() {
       try {
@@ -842,7 +714,6 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return ResponseEntity.status(500).body(0L);
       }
     }
-
     @GetMapping({"/consutarDoc"})
     public ResponseEntity<PersonaDto> consutarDoc(@RequestParam int doc) throws JsonMappingException, JsonProcessingException, ParseException {
         PersonaDto person = this.personaService.buscarByDocumento(Integer.valueOf(doc));
@@ -855,5 +726,3 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
         return new ResponseEntity(person, null, HttpStatus.ACCEPTED);
     }
   }
-
-

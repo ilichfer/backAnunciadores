@@ -1,5 +1,4 @@
   package  com.anunciadores.model;
-  
   import java.io.Serializable;
   import java.util.Date;
   import javax.persistence.Column;
@@ -9,22 +8,6 @@
   import javax.persistence.Id;
   import javax.persistence.Lob;
   import javax.persistence.Table;
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   @Entity
   @Table(name = "tdc")
   public class Tdc
@@ -50,74 +33,52 @@
     Boolean imagen;
     @Column(name = "url_image")
     String urlImage;
-    
     public String getUrlImage() {
-/*  55 */     return this.urlImage;
+return this.urlImage;
     }
-    
     public void setUrlImage(String urlImage) {
-/*  59 */     this.urlImage = urlImage;
+this.urlImage = urlImage;
     }
-    
     public int getId() {
-/*  63 */     return this.id;
+return this.id;
     }
-    
     public void setId(int id) {
-/*  67 */     this.id = id;
+this.id = id;
     }
-    
     public String getTdc() {
-/*  71 */     return this.tdc;
+return this.tdc;
     }
-    
     public void setTdc(String tdc) {
-/*  75 */     this.tdc = tdc;
+this.tdc = tdc;
     }
-
     public Date getFechaCreacion() {
       return fechaCreacion;
     }
-
     public void setFechaCreacion(Date fechaCreacion) {
-/*  83 */     this.fechaCreacion = fechaCreacion;
+this.fechaCreacion = fechaCreacion;
     }
-    
     public int getIdPersona() {
-/*  87 */     return this.idPersona;
+return this.idPersona;
     }
-    
     public void setIdPersona(int idPersona) {
-/*  91 */     this.idPersona = idPersona;
+this.idPersona = idPersona;
     }
-    
     public String getNombredocumento() {
-/*  95 */     return this.nombredocumento;
+return this.nombredocumento;
     }
-    
     public void setNombredocumento(String nombredocumento) {
-/*  99 */     this.nombredocumento = nombredocumento;
+this.nombredocumento = nombredocumento;
     }
-    
     public Boolean getPdf() {
-/* 103 */     return this.pdf;
+return this.pdf;
     }
-    
     public void setPdf(Boolean pdf) {
-/* 107 */     this.pdf = pdf;
+this.pdf = pdf;
     }
-    
     public Boolean getImagen() {
-/* 111 */     return this.imagen;
+return this.imagen;
     }
-    
     public void setImagen(Boolean imagen) {
-/* 115 */     this.imagen = imagen;
+this.imagen = imagen;
     }
   }
-
-
-/* Location:              C:\Users\Asus VivoBook\.m2\repository\com\anunciadores\anunciadores\0.0.1-SNAPSHOT\ROOT.war!\WEB-INF\classes\com\anunciadores\model\Tdc.class
- * Java compiler version: 11 (55.0)
- * JD-Core Version:       1.1.3
- */

@@ -1,5 +1,4 @@
 package com.anunciadores.service;
-
 import com.anunciadores.model.Notificacion;
 import com.anunciadores.repository.INotificacionRepo;
 import com.anunciadores.service.interfaces.INotificacionService;
@@ -12,14 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 @Service
 public class NotificacionServiceImpl implements INotificacionService {
     private final Logger log = LoggerFactory.getLogger(NotificacionServiceImpl.class);
-
     @Autowired
     private INotificacionRepo notificacionRepo;
-
     @Override
     @Transactional
     public Notificacion crearNotificacion(Notificacion notificacion) {
@@ -30,22 +26,18 @@ public class NotificacionServiceImpl implements INotificacionService {
             return null;
         }
     }
-
     @Override
     public List<Notificacion> getNotificacionesPorPersona(Integer idPersona) {
         return notificacionRepo.findByIdPersonaOrderByFechaCreacionDesc(idPersona);
     }
-
     @Override
     public List<Notificacion> getNotificacionesNoLeidas(Integer idPersona) {
         return notificacionRepo.findByIdPersonaAndLeidaFalseOrderByFechaCreacionDesc(idPersona);
     }
-
     @Override
     public Integer countNotificacionesNoLeidas(Integer idPersona) {
         return notificacionRepo.countNoLeidas(idPersona);
     }
-
     @Override
     @Transactional
     public Notificacion marcarLeida(Integer id) {
@@ -57,7 +49,6 @@ public class NotificacionServiceImpl implements INotificacionService {
         }
         return null;
     }
-
     @Override
     @Transactional
     public void marcarTodasLeidas(Integer idPersona) {
@@ -67,7 +58,6 @@ public class NotificacionServiceImpl implements INotificacionService {
             notificacionRepo.save(n);
         }
     }
-
     @Override
     @Transactional
     public void eliminarNotificacionesAntiguas(Integer idPersona, int dias) {
@@ -79,12 +69,10 @@ public class NotificacionServiceImpl implements INotificacionService {
             notificacionRepo.deleteAll(antiguas);
         }
     }
-
     @Override
     public List<Notificacion> getNotificacionesPendientesPorFecha(Date fecha) {
         return notificacionRepo.findByFechaServicioAndEnviadaFalse(fecha);
     }
-
     @Override
     @Transactional
     public void marcarEnviada(Integer id) {
@@ -95,7 +83,6 @@ public class NotificacionServiceImpl implements INotificacionService {
             notificacionRepo.save(notificacion);
         }
     }
-
     @Override
     @Transactional
     public void crearNotificacionAsignacion(Integer idPersona, Date fechaServicio, Integer idMinisterio, String ministerio, String posicion) {
@@ -111,7 +98,6 @@ public class NotificacionServiceImpl implements INotificacionService {
         notificacion.setLeida(false);
         notificacion.setEnviada(false);
         notificacion.setFechaCreacion(new Date());
-
         notificacionRepo.save(notificacion);
     }
 }
