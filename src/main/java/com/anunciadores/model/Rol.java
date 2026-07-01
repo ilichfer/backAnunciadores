@@ -24,6 +24,8 @@
 /*    */ public class Rol
 /*    */   implements Serializable
 /*    */ {
+/*    */   public static final int ID_ADMIN = 1;
+/*    */   public static final int ID_USER = 2;
 /*    */   private static final long serialVersionUID = 1L;
 /*    */   @Id
 /*    */   @Basic(optional = false)

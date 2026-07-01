@@ -20,9 +20,7 @@
   import com.anunciadores.model.inscripcionConsolidacion;
   import com.anunciadores.repository.*;
 
-  import java.math.BigInteger;
-  import java.security.MessageDigest;
-  import java.security.NoSuchAlgorithmException;
+  import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
   import java.time.LocalDate;
   import java.time.ZoneId;
   import java.time.ZonedDateTime;
@@ -130,12 +128,13 @@
     public Persona save(Persona persona) {
 /* 120 */     RolPersona rolPersona = new RolPersona();
 /* 121 */     persona.setPassword(encriptar(persona.getPassword()));
+        persona.setPasswordHashVersion(1);
 /* 122 */     Persona personaSave = (Persona)this.personaRepository.save(persona);
-      
+       
 /* 124 */     rolPersona.setIdPersona(personaSave.getId().intValue());
 /* 125 */     rolPersona.setIdRol(2);
 /* 126 */     this.rolesPersonaRepository.save(rolPersona);
-      
+       
 /* 128 */     return personaSave;
     }
   
@@ -490,20 +489,10 @@
     }
   
     
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     public String encriptar(String Pass) {
-      try {
-/* 484 */       MessageDigest md = MessageDigest.getInstance("MD5");
-/* 485 */       byte[] messageDigest = md.digest(Pass.getBytes());
-/* 486 */       BigInteger number = new BigInteger(1, messageDigest);
-/* 487 */       String hashtext = number.toString(16);
-        
-/* 489 */       while (hashtext.length() < 32) {
-/* 490 */         hashtext = "0" + hashtext;
-        }
-/* 492 */       return hashtext;
-/* 493 */     } catch (NoSuchAlgorithmException e) {
-/* 494 */       throw new RuntimeException(e);
-      } 
+        return passwordEncoder.encode(Pass);
     }
   
     
@@ -528,6 +517,7 @@
     
     public Persona savePassword(Persona persona) {
 /* 519 */     persona.setPassword(encriptar(persona.getPassword()));
+        persona.setPasswordHashVersion(1);
 /* 520 */     return (Persona)this.personaRepository.save(persona);
     }
   
@@ -624,43 +614,10 @@
   
     
     public void findUsuariosRol(int idPersona, int idRolNuevo) {
-/* 616 */     List<RolPersona> rol = new ArrayList<>();
-/* 617 */     rol = this.rolesPersonaRepository.findRolByidPersona(idPersona);
-/* 618 */     RolPersona rolUpdate = rol.get(0);
-/* 619 */     rolUpdate.setIdRol(idRolNuevo);
-/* 620 */     this.rolesPersonaRepository.save(rolUpdate);
-/* 621 */     if (rolUpdate.getIdRol() == 1) {
-/* 622 */       List<PermisosMenu> listpermisos = this.permisosRepo.findByIdPersona(idPersona);
-/* 623 */       if (listpermisos.size() == 0) {
-/* 624 */         List<PermisosMenu> listRolsInicial = crearRolesPrimerVezAdmin(idPersona);
-/* 625 */         for (PermisosMenu permiso : listRolsInicial) {
-/* 626 */           this.permisosRepo.save(permiso);
-          }
-        } 
-      } 
-    }
-  
-    
-    private List<PermisosMenu> crearRolesPrimerVezAdmin(int idPersona) {
-/* 634 */     List<ParamMenu> menuList = this.paramMenuRepo.findAll();
-      
-/* 636 */     List<PermisosMenu> listPermisosIniciales = new ArrayList<>();
-/* 637 */     String estadoInicial = "true";
-      
-/* 639 */     for (ParamMenu boton : menuList) {
-/* 640 */       PermisosMenu permisoInicial = new PermisosMenu();
-/* 641 */       permisoInicial.setIdPersona(idPersona);
-        
-/* 643 */       if (boton.getNombreBotonMenu().equals("menuAdministrar")) {
-/* 644 */         permisoInicial.setEstado("false");
-        } else {
-/* 646 */         permisoInicial.setEstado(estadoInicial);
-        } 
-/* 648 */       permisoInicial.setNombreBotonMenu(boton.getNombreBotonMenu());
-/* 649 */       permisoInicial.setMenu(boton);
-/* 650 */       listPermisosIniciales.add(permisoInicial);
-      } 
-/* 652 */     return listPermisosIniciales;
+      List<RolPersona> rol = this.rolesPersonaRepository.findRolByidPersona(idPersona);
+      RolPersona rolUpdate = rol.get(0);
+      rolUpdate.setIdRol(idRolNuevo);
+      this.rolesPersonaRepository.save(rolUpdate);
     }
   
     
