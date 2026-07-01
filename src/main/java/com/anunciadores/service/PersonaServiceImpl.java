@@ -614,43 +614,10 @@
   
     
     public void findUsuariosRol(int idPersona, int idRolNuevo) {
-/* 616 */     List<RolPersona> rol = new ArrayList<>();
-/* 617 */     rol = this.rolesPersonaRepository.findRolByidPersona(idPersona);
-/* 618 */     RolPersona rolUpdate = rol.get(0);
-/* 619 */     rolUpdate.setIdRol(idRolNuevo);
-/* 620 */     this.rolesPersonaRepository.save(rolUpdate);
-/* 621 */     if (rolUpdate.getIdRol() == 1) {
-/* 622 */       List<PermisosMenu> listpermisos = this.permisosRepo.findByIdPersona(idPersona);
-/* 623 */       if (listpermisos.size() == 0) {
-/* 624 */         List<PermisosMenu> listRolsInicial = crearRolesPrimerVezAdmin(idPersona);
-/* 625 */         for (PermisosMenu permiso : listRolsInicial) {
-/* 626 */           this.permisosRepo.save(permiso);
-          }
-        } 
-      } 
-    }
-  
-    
-    private List<PermisosMenu> crearRolesPrimerVezAdmin(int idPersona) {
-/* 634 */     List<ParamMenu> menuList = this.paramMenuRepo.findAll();
-      
-/* 636 */     List<PermisosMenu> listPermisosIniciales = new ArrayList<>();
-/* 637 */     String estadoInicial = "true";
-      
-/* 639 */     for (ParamMenu boton : menuList) {
-/* 640 */       PermisosMenu permisoInicial = new PermisosMenu();
-/* 641 */       permisoInicial.setIdPersona(idPersona);
-        
-/* 643 */       if (boton.getNombreBotonMenu().equals("menuAdministrar")) {
-/* 644 */         permisoInicial.setEstado("false");
-        } else {
-/* 646 */         permisoInicial.setEstado(estadoInicial);
-        } 
-/* 648 */       permisoInicial.setNombreBotonMenu(boton.getNombreBotonMenu());
-/* 649 */       permisoInicial.setMenu(boton);
-/* 650 */       listPermisosIniciales.add(permisoInicial);
-      } 
-/* 652 */     return listPermisosIniciales;
+      List<RolPersona> rol = this.rolesPersonaRepository.findRolByidPersona(idPersona);
+      RolPersona rolUpdate = rol.get(0);
+      rolUpdate.setIdRol(idRolNuevo);
+      this.rolesPersonaRepository.save(rolUpdate);
     }
   
     

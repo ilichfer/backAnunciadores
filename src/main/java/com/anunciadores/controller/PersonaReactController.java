@@ -12,6 +12,7 @@ import com.anunciadores.service.UsuarioService;
 import com.anunciadores.service.interfaces.*;
 import com.anunciadores.util.UtilDate;
 import com.anunciadores.model.Notificacion;
+import com.anunciadores.model.Rol;
 import com.anunciadores.dto.ImagenMensualDto;
   import com.fasterxml.jackson.core.JsonProcessingException;
   import com.fasterxml.jackson.databind.JsonMappingException;
@@ -496,6 +497,21 @@ import org.springframework.web.bind.annotation.*;
 /* 468 */       rp = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("so se puedo actualizar el estado del usuario");
       } 
 /* 470 */     return rp;
+    }
+
+    @PutMapping({"/personas/{idPersona}/rol"})
+    public ResponseEntity<?> cambiarRol(@PathVariable Integer idPersona, @RequestParam Integer idRol) {
+      try {
+        if (idRol != Rol.ID_ADMIN && idRol != Rol.ID_USER) {
+          return ResponseEntity.badRequest().body("idRol debe ser " + Rol.ID_ADMIN + " (ADMIN) o " + Rol.ID_USER + " (USER)");
+        }
+        personaService.findUsuariosRol(idPersona, idRol);
+        String nombreRol = idRol == Rol.ID_ADMIN ? "ADMINISTRADOR" : "USER";
+        return ResponseEntity.ok("Rol actualizado a " + nombreRol);
+      } catch (Exception e) {
+        LOGGER.error("Error al cambiar rol", e);
+        return ResponseEntity.status(500).body("Error al cambiar rol: " + e.getMessage());
+      }
     }
   
   
