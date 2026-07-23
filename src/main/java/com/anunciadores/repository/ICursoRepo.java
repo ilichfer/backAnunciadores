@@ -1,5 +1,6 @@
 package  com.anunciadores.repository;
 import com.anunciadores.model.Curso;
+import com.anunciadores.model.Persona;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +15,7 @@ public interface ICursoRepo extends JpaRepository<Curso, Integer> {
   List<Curso> cursosByIdPersona(int paramInt);
   @Query(nativeQuery = true, value = "SELECT c.* FROM persona p  join curso c on p.id  = c.profesor  where p.id= ?1 ")
   List<Curso> cursosByIdProfesor(int paramInt);
+  List<Curso> findByActivoTrue();
+  @Query(nativeQuery = true, value = "SELECT p.* FROM inscripciones ins JOIN persona p ON ins.id_persona = p.id WHERE ins.id_curso = ?1")
+  List<Persona> findEstudiantesByCurso(int idCurso);
 }

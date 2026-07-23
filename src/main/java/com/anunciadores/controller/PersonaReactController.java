@@ -3,7 +3,10 @@
   import com.anunciadores.auth.dto.updateServiceRequest;
   import com.anunciadores.dto.*;
 import com.anunciadores.model.Coordinador;
+import com.anunciadores.model.Curso;
+import com.anunciadores.model.Inscripciones;
 import com.anunciadores.model.Ministerio;
+import com.anunciadores.model.NotasCurso;
 import com.anunciadores.model.Persona;
 import com.anunciadores.model.Servicio;
 import com.anunciadores.model.Tdc;
@@ -49,6 +52,8 @@ private Logger LOGGER = LoggerFactory.getLogger(com.anunciadores.controller.Pers
     @Autowired
     private ICursoService cursoService;
     @Autowired
+    private ICursoRepo cursoRepository;
+    @Autowired
     private IBibliaService bibliaService;
     @Autowired
     private IPersonaRepo personaRepoImpl;
@@ -80,6 +85,8 @@ private Logger LOGGER = LoggerFactory.getLogger(com.anunciadores.controller.Pers
     private IImagenMensualService imagenMensualService;
     @Autowired
     private IContactoService contactoService;
+    @Autowired
+    private InscripcionRepo inscripcionRepo;
     List<Persona> personasList;
     List<PersonaDto> personasListDto;
     @GetMapping({"/users"})
@@ -724,5 +731,202 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
             person.setCoordinadorActual(false);
         }
         return new ResponseEntity(person, null, HttpStatus.ACCEPTED);
+    }
+    // ─── Endpoints de Cursos ────────────────────────────────────────────────────
+    @GetMapping({"/cursos"})
+    public ResponseEntity<?> listarCursos() {
+      try {
+        List<Curso> cursos = cursoService.findAll();
+        return ResponseEntity.ok(cursos);
+      } catch (Exception e) {
+        LOGGER.error("Error al listar cursos", e);
+        return ResponseEntity.status(500).body("Error al listar cursos: " + e.getMessage());
+      }
+    }
+    @GetMapping({"/cursos/{id}"})
+    public ResponseEntity<?> getCurso(@PathVariable int id) {
+      try {
+        Curso curso = cursoService.findCursoById(id);
+        if (curso == null) {
+          return ResponseEntity.status(404).body("Curso no encontrado");
+        }
+        return ResponseEntity.ok(curso);
+      } catch (Exception e) {
+        LOGGER.error("Error al obtener curso", e);
+        return ResponseEntity.status(500).body("Error al obtener curso: " + e.getMessage());
+      }
+    }
+    @PostMapping({"/cursos"})
+    public ResponseEntity<?> crearCurso(@RequestBody CursoDto cursoDto) {
+      try {
+        Curso curso = cursoService.save(cursoDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(curso);
+      } catch (Exception e) {
+        LOGGER.error("Error al crear curso", e);
+        return ResponseEntity.status(500).body("Error al crear curso: " + e.getMessage());
+      }
+    }
+    @PutMapping({"/cursos/{id}"})
+    public ResponseEntity<?> actualizarCurso(@PathVariable int id, @RequestBody CursoDto cursoDto) {
+      try {
+        cursoDto.setId(id);
+        Curso curso = cursoService.save(cursoDto);
+        return ResponseEntity.ok(curso);
+      } catch (Exception e) {
+        LOGGER.error("Error al actualizar curso", e);
+        return ResponseEntity.status(500).body("Error al actualizar curso: " + e.getMessage());
+      }
+    }
+    @PutMapping({"/cursos/{id}/desactivar"})
+    public ResponseEntity<?> desactivarCurso(@PathVariable int id) {
+      try {
+        Curso curso = cursoService.findCursoById(id);
+        if (curso == null) {
+          return ResponseEntity.status(404).body("Curso no encontrado");
+        }
+        cursoService.desactivarCurso(curso);
+        return ResponseEntity.ok("Curso desactivado correctamente");
+      } catch (Exception e) {
+        LOGGER.error("Error al desactivar curso", e);
+        return ResponseEntity.status(500).body("Error al desactivar curso: " + e.getMessage());
+      }
+    }
+    @GetMapping({"/cursos/{id}/estudiantes"})
+    public ResponseEntity<?> listarEstudiantesCurso(@PathVariable int id) {
+      try {
+        List<Inscripciones> inscripciones = inscripcionRepo.findByIdCurso(id);
+        List<Persona> estudiantes = new java.util.ArrayList<>();
+        for (Inscripciones ins : inscripciones) {
+          personaRepoImpl.findById(ins.getIdPersona()).ifPresent(estudiantes::add);
+        }
+        return ResponseEntity.ok(estudiantes);
+      } catch (Exception e) {
+        LOGGER.error("Error al listar estudiantes del curso", e);
+        return ResponseEntity.status(500).body("Error al listar estudiantes: " + e.getMessage());
+      }
+    }
+    @PostMapping({"/cursos/{id}/estudiantes"})
+    public ResponseEntity<?> inscribirEstudiante(@PathVariable int id, @RequestBody java.util.Map<String, Integer> body) {
+      try {
+        Integer idPersona = body.get("idPersona");
+        if (idPersona == null) {
+          return ResponseEntity.badRequest().body("idPersona es requerido");
+        }
+        java.util.Optional<Inscripciones> existente = inscripcionRepo.findByIdCursoAndIdPersona(id, idPersona);
+        if (existente.isPresent()) {
+          return ResponseEntity.status(HttpStatus.CONFLICT).body("El estudiante ya está inscrito en este curso");
+        }
+        Inscripciones inscripcion = new Inscripciones();
+        inscripcion.setIdCurso(id);
+        inscripcion.setIdPersona(idPersona);
+        inscripcionRepo.save(inscripcion);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Estudiante inscrito correctamente");
+      } catch (Exception e) {
+        LOGGER.error("Error al inscribir estudiante", e);
+        return ResponseEntity.status(500).body("Error al inscribir estudiante: " + e.getMessage());
+      }
+    }
+    @DeleteMapping({"/cursos/{id}/estudiantes/{idPersona}"})
+    public ResponseEntity<?> desinscribirEstudiante(@PathVariable int id, @PathVariable int idPersona) {
+      try {
+        inscripcionRepo.deleteByIdCursoAndIdPersona(id, idPersona);
+        return ResponseEntity.ok("Estudiante desinscrito correctamente");
+      } catch (Exception e) {
+        LOGGER.error("Error al desinscribir estudiante", e);
+        return ResponseEntity.status(500).body("Error al desinscribir estudiante: " + e.getMessage());
+      }
+    }
+    @GetMapping({"/cursos/{id}/profesor"})
+    public ResponseEntity<?> getProfesorCurso(@PathVariable int id) {
+      try {
+        Curso curso = cursoService.findCursoById(id);
+        if (curso == null) {
+          return ResponseEntity.status(404).body("Curso no encontrado");
+        }
+        Persona profesor = curso.getProfesor();
+        if (profesor == null) {
+          return ResponseEntity.status(404).body("No hay profesor asignado a este curso");
+        }
+        return ResponseEntity.ok(profesor);
+      } catch (Exception e) {
+        LOGGER.error("Error al obtener profesor del curso", e);
+        return ResponseEntity.status(500).body("Error al obtener profesor: " + e.getMessage());
+      }
+    }
+    @PutMapping({"/cursos/{id}/profesor"})
+    public ResponseEntity<?> asignarProfesor(@PathVariable int id, @RequestBody java.util.Map<String, Integer> body) {
+      try {
+        Integer idPersona = body.get("idPersona");
+        if (idPersona == null) {
+          return ResponseEntity.badRequest().body("idPersona es requerido");
+        }
+        Curso curso = cursoService.findCursoById(id);
+        if (curso == null) {
+          return ResponseEntity.status(404).body("Curso no encontrado");
+        }
+        Persona profesor = personaRepoImpl.findById(idPersona).orElse(null);
+        if (profesor == null) {
+          return ResponseEntity.status(404).body("Persona no encontrada");
+        }
+        CursoDto cursoDto = new CursoDto();
+        cursoDto.setId(curso.getId());
+        cursoDto.setNombreCurso(curso.getNombreCurso());
+        cursoDto.setFechaInicio(curso.getFechaInicio());
+        cursoDto.setFechaFin(curso.getFechaFin());
+        cursoDto.setValorTotal(curso.getValorTotal());
+        cursoDto.setProfesor(idPersona);
+        cursoService.save(cursoDto);
+        return ResponseEntity.ok("Profesor asignado correctamente");
+      } catch (Exception e) {
+        LOGGER.error("Error al asignar profesor", e);
+        return ResponseEntity.status(500).body("Error al asignar profesor: " + e.getMessage());
+      }
+    }
+    // ─── Endpoints de Notas por Curso ──────────────────────────────────────────
+    @GetMapping({"/cursos/{id}/notas"})
+    public ResponseEntity<?> listarNotasCurso(@PathVariable int id) {
+      try {
+        List<Persona> estudiantes = new java.util.ArrayList<>();
+        List<Inscripciones> inscripciones = inscripcionRepo.findByIdCurso(id);
+        for (Inscripciones ins : inscripciones) {
+          personaRepoImpl.findById(ins.getIdPersona()).ifPresent(estudiantes::add);
+        }
+        List<PersonaDto> resultado = cursoService.buscarNotasXPersonas(id, estudiantes);
+        return ResponseEntity.ok(resultado);
+      } catch (Exception e) {
+        LOGGER.error("Error al listar notas del curso", e);
+        return ResponseEntity.status(500).body("Error al listar notas: " + e.getMessage());
+      }
+    }
+    @PostMapping({"/cursos/{id}/notas"})
+    public ResponseEntity<?> guardarNota(@PathVariable int id, @RequestBody java.util.Map<String, Object> body) {
+      try {
+        int idPersona = ((Number) body.get("idPersona")).intValue();
+        double notaMaestro = body.get("notaMaestro") != null ? ((Number) body.get("notaMaestro")).doubleValue() : 0;
+        double notaAsistencia = body.get("notaAsistencia") != null ? ((Number) body.get("notaAsistencia")).doubleValue() : 0;
+        double notaPractica = body.get("notaPractica") != null ? ((Number) body.get("notaPractica")).doubleValue() : 0;
+        double notaExamenFinal = body.get("notaExamenFinal") != null ? ((Number) body.get("notaExamenFinal")).doubleValue() : 0;
+        NotasCurso existente = cursoService.findNotasByCurso(id, idPersona);
+        NotasCurso notas;
+        if (existente != null) {
+          notas = existente;
+        } else {
+          notas = new NotasCurso();
+          notas.setId(id * 100000 + idPersona);
+          Persona persona = personaRepoImpl.findById(idPersona).orElse(null);
+          Curso curso = cursoService.findCursoById(id);
+          notas.setCurso(curso);
+          notas.setPersona(persona);
+        }
+        notas.setNotaMaestro(notaMaestro);
+        notas.setNotaAsistencia(notaAsistencia);
+        notas.setNotaPractica(notaPractica);
+        notas.setNotaExamenFinal(notaExamenFinal);
+        NotasCurso guardada = cursoService.saveNotasCurso(notas);
+        return ResponseEntity.ok(guardada);
+      } catch (Exception e) {
+        LOGGER.error("Error al guardar nota", e);
+        return ResponseEntity.status(500).body("Error al guardar nota: " + e.getMessage());
+      }
     }
   }
