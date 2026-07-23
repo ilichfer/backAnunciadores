@@ -82,7 +82,12 @@ cursoSave.setNombreCurso(curso.getNombreCurso());
 cursoSave.setValorTotal(curso.getValorTotal());
 cursoSave.setComentario((curso.getCheck() != null));
 cursoSave.setActivo(true);
-cursoSave.setProfesor(this.personaRepo.findById(Integer.valueOf(curso.getProfesor())).get());
+if (curso.getProfesor() > 0) {
+  java.util.Optional<Persona> prof = this.personaRepo.findById(Integer.valueOf(curso.getProfesor()));
+  if (prof.isPresent()) {
+    cursoSave.setProfesor(prof.get());
+  }
+}
 return (Curso)this.cursoRepository.save(cursoSave);
     }
     public Curso findCursoById(Integer id) {
