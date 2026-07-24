@@ -87,6 +87,8 @@ private Logger LOGGER = LoggerFactory.getLogger(com.anunciadores.controller.Pers
     private IContactoService contactoService;
     @Autowired
     private InscripcionRepo inscripcionRepo;
+    @Autowired
+    private INotasCursoRepo notasCursoRepo;
     List<Persona> personasList;
     List<PersonaDto> personasListDto;
     @GetMapping({"/users"})
@@ -927,6 +929,16 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
       } catch (Exception e) {
         LOGGER.error("Error al guardar nota", e);
         return ResponseEntity.status(500).body("Error al guardar nota: " + e.getMessage());
+      }
+    }
+    @GetMapping({"/personas/{id}/notas-historico"})
+    public ResponseEntity<?> getHistoricoNotas(@PathVariable int id) {
+      try {
+        List<NotasCurso> notas = notasCursoRepo.findHistoricoNotasConCurso(id);
+        return ResponseEntity.ok(notas);
+      } catch (Exception e) {
+        LOGGER.error("Error al obtener historico de notas", e);
+        return ResponseEntity.status(500).body("Error al obtener historico: " + e.getMessage());
       }
     }
   }
