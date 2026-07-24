@@ -400,6 +400,15 @@ return rp;
         return ResponseEntity.status(500).body("Error al cambiar rol: " + e.getMessage());
       }
     }
+    @GetMapping({"/personas/todas"})
+    public ResponseEntity<List<PersonaDto>> todasLasPersonas() {
+      try {
+        return ResponseEntity.ok(personaService.findAllUsuariosRol());
+      } catch (Exception e) {
+        LOGGER.error("Error al obtener personas", e);
+        return ResponseEntity.status(500).build();
+      }
+    }
     @PostMapping({"/personas/register"})
     public ResponseEntity<?> registerPersona(@RequestBody RegisterPersonaRequestDto request) {
       try {
