@@ -13,6 +13,7 @@
   import com.anunciadores.repository.INotasCursoRepo;
   import com.anunciadores.repository.IPersonaRepo;
   import com.anunciadores.service.interfaces.ICursoService;
+import com.anunciadores.service.interfaces.IConfiguracionService;
   import java.text.DateFormat;
   import java.text.ParseException;
   import java.text.SimpleDateFormat;
@@ -41,6 +42,8 @@
     private mapperNotas mapperNotas;
     @Autowired
     private mapperPersona mapperPersona;
+    @Autowired
+    private IConfiguracionService configuracionService;
 List<Curso> listaCursos = new ArrayList<>();
     public List<Curso> findAll() {
 List<Curso> listaCursosActivos = new ArrayList<>();
@@ -110,10 +113,15 @@ List<NotasCurso> listaVacia = new ArrayList<>();
 return listaVacia;
     }
     public NotasCurso saveNotasCurso(NotasCurso notas) throws ParseException {
-double notaM = notas.getNotaMaestro() * 0.3D;
-double notaA = notas.getNotaAsistencia() * 0.2D;
-double notaP = notas.getNotaPractica() * 0.2D;
-double notaEF = notas.getNotaExamenFinal() * 0.3D;
+java.util.Map<String, Double> pesos = configuracionService.findPesosNota();
+double pesoM = pesos.getOrDefault("PESO_MAESTRO", 30.0) / 100.0;
+double pesoA = pesos.getOrDefault("PESO_ASISTENCIA", 20.0) / 100.0;
+double pesoP = pesos.getOrDefault("PESO_PRACTICA", 20.0) / 100.0;
+double pesoE = pesos.getOrDefault("PESO_EXAMEN", 30.0) / 100.0;
+double notaM = notas.getNotaMaestro() * pesoM;
+double notaA = notas.getNotaAsistencia() * pesoA;
+double notaP = notas.getNotaPractica() * pesoP;
+double notaEF = notas.getNotaExamenFinal() * pesoE;
 double notafinal = notaM + notaA + notaP + notaEF;
 notas.setNotaFinal(notafinal);
 return (NotasCurso)this.notasCursoRepo.save(notas);
