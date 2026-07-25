@@ -12,4 +12,6 @@ public interface INotasCursoRepo extends JpaRepository<NotasCurso, Integer> {
   NotasCurso findNotasByCurso(@Param("idCurso")int paramInt1,@Param("idPersona") int paramInt2);
   @Query(nativeQuery = true, value = "select nc.* from notas_curso nc where nc.id_persona = :idPersona ")
   Optional<List<NotasCurso>> findHistoricoNotas(@Param("idPersona")int paramInt);
+  @Query("SELECT nc FROM NotasCurso nc JOIN FETCH nc.curso WHERE nc.persona.id = :idPersona")
+  List<NotasCurso> findHistoricoNotasConCurso(@Param("idPersona") int idPersona);
 }

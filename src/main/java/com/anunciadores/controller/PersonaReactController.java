@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
   import java.util.List;
+  import java.util.Map;
   import javax.servlet.http.HttpServletRequest;
   import org.slf4j.Logger;
   import org.slf4j.LoggerFactory;
@@ -87,6 +88,10 @@ private Logger LOGGER = LoggerFactory.getLogger(com.anunciadores.controller.Pers
     private IContactoService contactoService;
     @Autowired
     private InscripcionRepo inscripcionRepo;
+    @Autowired
+    private INotasCursoRepo notasCursoRepo;
+    @Autowired
+    private IConfiguracionService configuracionService;
     List<Persona> personasList;
     List<PersonaDto> personasListDto;
     @GetMapping({"/users"})
@@ -396,6 +401,15 @@ return rp;
       } catch (Exception e) {
         LOGGER.error("Error al cambiar rol", e);
         return ResponseEntity.status(500).body("Error al cambiar rol: " + e.getMessage());
+      }
+    }
+    @GetMapping({"/personas/todas"})
+    public ResponseEntity<List<PersonaDto>> todasLasPersonas() {
+      try {
+        return ResponseEntity.ok(personaService.findAllUsuariosRol());
+      } catch (Exception e) {
+        LOGGER.error("Error al obtener personas", e);
+        return ResponseEntity.status(500).build();
       }
     }
     @PostMapping({"/personas/register"})
@@ -927,6 +941,40 @@ public ResponseEntity<?> saveService(@RequestBody List<ServiceDTO> request) {
       } catch (Exception e) {
         LOGGER.error("Error al guardar nota", e);
         return ResponseEntity.status(500).body("Error al guardar nota: " + e.getMessage());
+      }
+    }
+    @GetMapping({"/personas/{id}/notas-historico"})
+    public ResponseEntity<?> getHistoricoNotas(@PathVariable int id) {
+      try {
+        List<NotasCurso> notas = notasCursoRepo.findHistoricoNotasConCurso(id);
+        return ResponseEntity.ok(notas);
+      } catch (Exception e) {
+        LOGGER.error("Error al obtener historico de notas", e);
+        return ResponseEntity.status(500).body("Error al obtener historico: " + e.getMessage());
+      }
+    }
+    @GetMapping({"/configuracion/pesos-nota"})
+    public ResponseEntity<?> getPesosNota() {
+      try {
+        return ResponseEntity.ok(configuracionService.findPesosNota());
+      } catch (Exception e) {
+        LOGGER.error("Error al obtener pesos de nota", e);
+        return ResponseEntity.status(500).body("Error al obtener configuración: " + e.getMessage());
+      }
+    }
+    @PutMapping({"/configuracion/pesos-nota"})
+    public ResponseEntity<?> savePesosNota(@RequestBody Map<String, Double> pesos) {
+      try {
+        double total = 0;
+        for (Double v : pesos.values()) { total += (v != null ? v : 0); }
+        if (Math.abs(total - 100) > 0.01) {
+          return ResponseEntity.badRequest().body("La suma de los pesos debe ser 100%. Actual: " + total);
+        }
+        configuracionService.savePesosNota(pesos);
+        return ResponseEntity.ok("Pesos de nota actualizados correctamente");
+      } catch (Exception e) {
+        LOGGER.error("Error al guardar pesos de nota", e);
+        return ResponseEntity.status(500).body("Error al guardar configuración: " + e.getMessage());
       }
     }
   }
