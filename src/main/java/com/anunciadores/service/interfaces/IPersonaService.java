@@ -9,6 +9,7 @@ import java.util.List;
 public interface IPersonaService {
   List<Persona> findAllUsuarios();
   Persona save(Persona paramPersona);
+  Persona save(Persona paramPersona, int paramInt);
   Persona update(Persona paramPersona);
   Persona saveAsistente(Persona paramPersona);
   Persona saveAsistenteConsolidacion(Persona paramPersona, Consolidacion paramConsolidacion);

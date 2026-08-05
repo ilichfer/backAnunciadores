@@ -96,12 +96,15 @@ private Logger LOGGER = LoggerFactory.getLogger(com.anunciadores.service.Persona
 return this.personaRepository.findUsuarios();
     }
     public Persona save(Persona persona) {
+        return save(persona, 2);
+    }
+    public Persona save(Persona persona, int idRol) {
 RolPersona rolPersona = new RolPersona();
 persona.setPassword(encriptar(persona.getPassword()));
         persona.setPasswordHashVersion(1);
 Persona personaSave = (Persona)this.personaRepository.save(persona);
 rolPersona.setIdPersona(personaSave.getId().intValue());
-rolPersona.setIdRol(2);
+rolPersona.setIdRol(idRol);
 this.rolesPersonaRepository.save(rolPersona);
 return personaSave;
     }
@@ -437,11 +440,16 @@ dto.setEmail(persona.getEmail());
 dto.setPhone(persona.getTelefono());
 dto.setActive(persona.getEstado());
 List<Rol> roles = this.rolesDao.buscarRoles(persona.getId());
-for (Rol rol : roles) {
-if (rol.getDescripcion().equalsIgnoreCase("ADMINISTRADOR")) {
-dto.setRole(rol.getDescripcion());
-          }
-        } 
+if (!roles.isEmpty()) {
+  Rol rolPrimero = roles.get(0);
+  if (rolPrimero.getDescripcion().equalsIgnoreCase("ADMINISTRADOR")) {
+    dto.setRole("ADMINISTRADOR");
+  } else if (rolPrimero.getDescripcion().equalsIgnoreCase("SERVIDOR")) {
+    dto.setRole("SERVIDOR");
+  } else {
+    dto.setRole("USUARIO");
+  }
+}
 } catch (Exception e) {
 e.printStackTrace();
       } 

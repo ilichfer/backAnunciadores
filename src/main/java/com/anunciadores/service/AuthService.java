@@ -57,7 +57,14 @@ public class AuthService
     }
     List<RolPersona> roldb = this.rolesPersonaRepo.findRolByidPersona(persona.getId().intValue());
     RolPersona rolP = roldb.get(0);
-    String rol = (rolP.getIdRol() == 1) ? "ADMIN" : "USER";
+    String rol;
+    if (rolP.getIdRol() == 1) {
+      rol = "ADMIN";
+    } else if (rolP.getIdRol() == 2) {
+      rol = "SERVIDOR";
+    } else {
+      rol = "USUARIO";
+    }
     String nombreCompleto = persona.getNombre() + " " + persona.getApellido();
     String token = this.jwtService.generarToken(
         String.valueOf(persona.getDocumento()), rol, nombreCompleto);
