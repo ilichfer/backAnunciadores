@@ -15,6 +15,8 @@ public interface IPersonaRepo extends JpaRepository<Persona, Integer> {
   Optional<List<Persona>> findByCelular(@Param("celular") String paramString);
   Optional<List<Persona>> findByIdTelegram(String paramString);
   Persona findByDocumento(Integer paramInteger);
+  boolean existsByDocumento(Integer documento);
+  boolean existsByEmail(String email);
   @Query(nativeQuery = false, value = "select distinct p from Persona p join Inscripciones i on p.id  = i.idPersona join Curso c on i.idCurso = c.id where c.id =:idcurso")
   List<Persona> findPersonaByCurso(@Param("idcurso") Integer paramInteger);
   @Query(nativeQuery = true, value = "select p.* from persona p where id not in (select i.id_persona from inscripciones i  join curso c on i.id_curso = c.id  where i.id_curso =:idcurso )and p.id in( select pr.id_persona from persona_rol pr)  order by p.nombre asc")

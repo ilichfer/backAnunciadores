@@ -450,6 +450,15 @@ return rp;
         persona.setConsolidacion(request.getConsolidacion());
         persona.setPassword(request.getPassword());
         persona.setEstado(true);
+        if (personaService.existeDocumento(request.getDocumento())) {
+          return ResponseEntity.status(HttpStatus.CONFLICT)
+              .body("Ya existe una persona registrada con el documento " + request.getDocumento());
+        }
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()
+            && personaService.existeEmail(request.getEmail())) {
+          return ResponseEntity.status(HttpStatus.CONFLICT)
+              .body("Ya existe una persona registrada con el email " + request.getEmail());
+        }
         int idRol = (request.getRol() != null && (request.getRol() == 1 || request.getRol() == 2 || request.getRol() == 3))
             ? request.getRol().intValue() : com.anunciadores.model.Rol.ID_USUARIO;
         Persona saved = personaService.save(persona, idRol);

@@ -19,6 +19,8 @@ public interface IPersonaService {
   Persona toggleActive(Integer paramInteger, Boolean paramBoolean);
   String habilitar(Persona paramPersona);
   PersonaDto buscarByDocumento(Integer paramInteger);
+  boolean existeDocumento(Integer documento);
+  boolean existeEmail(String email);
   PersonaDto buscarEmail(String paramString);
   List<Persona> findAllByCurso(int paramInt);
   List<Persona> buscarTodosSinCurso(int paramInt);

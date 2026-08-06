@@ -267,6 +267,12 @@ throw new RuntimeException("[buscarByDocumento]" + e.getMessage());
       } 
 return personadto;
     }
+    public boolean existeDocumento(Integer documento) {
+return this.personaRepository.existsByDocumento(documento);
+    }
+    public boolean existeEmail(String email) {
+return this.personaRepository.existsByEmail(email);
+    }
     private void compararPermisos(List<PermisosMenu> permisos, int idPersona) {
 List<ParamMenu> menuList = this.paramMenuRepo.findAll();
 List<PermisosMenu> permisosCompletos = contruirPermisosServidor(menuList);
