@@ -392,11 +392,18 @@ return rp;
     @PutMapping({"/personas/{idPersona}/rol"})
     public ResponseEntity<?> cambiarRol(@PathVariable Integer idPersona, @RequestParam Integer idRol) {
       try {
-        if (idRol != Rol.ID_ADMIN && idRol != Rol.ID_USER) {
-          return ResponseEntity.badRequest().body("idRol debe ser " + Rol.ID_ADMIN + " (ADMIN) o " + Rol.ID_USER + " (USER)");
+        if (idRol != Rol.ID_ADMIN && idRol != Rol.ID_USER && idRol != Rol.ID_USUARIO) {
+          return ResponseEntity.badRequest().body("idRol debe ser " + Rol.ID_ADMIN + " (ADMIN), " + Rol.ID_USER + " (SERVIDOR) o " + Rol.ID_USUARIO + " (USUARIO)");
         }
         personaService.findUsuariosRol(idPersona, idRol);
-        String nombreRol = idRol == Rol.ID_ADMIN ? "ADMINISTRADOR" : "USER";
+        String nombreRol;
+        if (idRol == Rol.ID_ADMIN) {
+          nombreRol = "ADMINISTRADOR";
+        } else if (idRol == Rol.ID_USER) {
+          nombreRol = "SERVIDOR";
+        } else {
+          nombreRol = "USUARIO";
+        }
         return ResponseEntity.ok("Rol actualizado a " + nombreRol);
       } catch (Exception e) {
         LOGGER.error("Error al cambiar rol", e);
@@ -443,7 +450,18 @@ return rp;
         persona.setConsolidacion(request.getConsolidacion());
         persona.setPassword(request.getPassword());
         persona.setEstado(true);
-        Persona saved = personaService.save(persona);
+        if (personaService.existeDocumento(request.getDocumento())) {
+          return ResponseEntity.status(HttpStatus.CONFLICT)
+              .body("Ya existe una persona registrada con el documento " + request.getDocumento());
+        }
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()
+            && personaService.existeEmail(request.getEmail())) {
+          return ResponseEntity.status(HttpStatus.CONFLICT)
+              .body("Ya existe una persona registrada con el email " + request.getEmail());
+        }
+        int idRol = (request.getRol() != null && (request.getRol() == 1 || request.getRol() == 2 || request.getRol() == 3))
+            ? request.getRol().intValue() : com.anunciadores.model.Rol.ID_USUARIO;
+        Persona saved = personaService.save(persona, idRol);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
       } catch (Exception e) {
         LOGGER.error("Error al registrar persona", e);

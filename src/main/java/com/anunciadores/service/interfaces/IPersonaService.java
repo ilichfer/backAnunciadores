@@ -9,6 +9,7 @@ import java.util.List;
 public interface IPersonaService {
   List<Persona> findAllUsuarios();
   Persona save(Persona paramPersona);
+  Persona save(Persona paramPersona, int paramInt);
   Persona update(Persona paramPersona);
   Persona saveAsistente(Persona paramPersona);
   Persona saveAsistenteConsolidacion(Persona paramPersona, Consolidacion paramConsolidacion);
@@ -18,6 +19,8 @@ public interface IPersonaService {
   Persona toggleActive(Integer paramInteger, Boolean paramBoolean);
   String habilitar(Persona paramPersona);
   PersonaDto buscarByDocumento(Integer paramInteger);
+  boolean existeDocumento(Integer documento);
+  boolean existeEmail(String email);
   PersonaDto buscarEmail(String paramString);
   List<Persona> findAllByCurso(int paramInt);
   List<Persona> buscarTodosSinCurso(int paramInt);

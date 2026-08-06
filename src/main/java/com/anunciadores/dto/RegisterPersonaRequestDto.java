@@ -27,6 +27,7 @@ public class RegisterPersonaRequestDto {
     private String descMinoria;
     private Boolean consolidacion;
     private String password;
+    private Integer rol;
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -80,4 +81,6 @@ public class RegisterPersonaRequestDto {
     public void setConsolidacion(Boolean consolidacion) { this.consolidacion = consolidacion; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    public Integer getRol() { return rol; }
+    public void setRol(Integer rol) { this.rol = rol; }
 }
