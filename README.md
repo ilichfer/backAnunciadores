@@ -7,32 +7,32 @@ API REST para la gestión eclesiástica digital de la iglesia **Anunciadores de 
 | Tecnología | Versión |
 |---|---|
 | Java | 11 |
-| Spring Boot | 2.7.4 |
-| Spring Data JPA / Hibernate | 2.7.4 |
-| MySQL | (configurado vía `application.properties`) |
+| Spring Boot | 2.7.18 |
+| Spring Security + JWT (JJWT) | 5.7 / 0.11.5 |
+| Spring Data JPA / Hibernate | 2.7 |
+| MySQL | 8 |
 | Maven | Wrapper (`mvnw`) |
 | Cloudflare R2 (AWS SDK S3 v2) | 2.20.26 |
-| OpenFeign | 2021.0.5 |
+| OpenFeign | 2021.0.9 |
 | MapStruct | 1.5.5.Final |
-| JJWT | 0.9.1 |
-| Swagger (Springfox) | 2.9.2 |
 
 ## Estructura
 
 ```
 src/main/java/com/anunciadores/
-├── controller/        → Endpoints REST (AuthController, PersonaReactController)
-├── service/           → Lógica de negocio (24 servicios)
-│   └── interfaces/    → Contratos de servicio
-├── repository/        → Acceso a datos JPA (30+ repositorios)
-├── model/             → Entidades JPA (30+ entidades)
-├── dto/               → Objetos de transferencia (79 DTOs)
-├── mapper/            → MapStruct mappers (7 mappers)
-├── client/            → Clientes Feign (Telegram, Biblia, R2)
-├── auth/              → DTOs de autenticación + configuración CORS
-├── security/          → Configuración Spring Security
-├── util/              → Utilidades (fechas, JWT, encriptación)
-└── scheduler/         → Tareas programadas (limpieza TCD, notificaciones)
+├── controller/        → Endpoints REST, uno por módulo:
+│                        Auth, Persona, Ministerio, Programacion, Tcd, Notificacion,
+│                        Contacto, ImagenMensual, Dashboard, Curso, Configuracion
+│                        + GlobalExceptionHandler (errores sin detalles internos)
+├── security/          → SecurityConfig (reglas por rol), filtro JWT, CurrentUser, RateLimiter
+├── service/           → Lógica de negocio (+ interfaces/)
+├── repository/        → Acceso a datos JPA
+├── model/             → Entidades JPA
+├── dto/               → Objetos de transferencia
+├── mapper/            → MapStruct mappers
+├── client/            → Clientes Feign (Telegram, Biblia) y R2
+├── util/              → Fechas, validación de imágenes, limpieza del driver JDBC
+└── scheduler/         → Tareas programadas (notificaciones)
 ```
 
 ## Requisitos
@@ -50,17 +50,34 @@ cd backAnunciadores
 
 El servidor inicia en `http://localhost:5000`.
 
-## Variables de entorno / Configuración
+## Configuración y secretos
 
-Editar `src/main/resources/application.properties`:
+`src/main/resources/application.properties` **no contiene secretos**. Las contraseñas, tokens y claves
+se leen de un archivo aparte que nunca se sube a git:
+
+| Dónde | Archivo |
+|---|---|
+| Local | `application-secrets.properties` en la raíz del proyecto |
+| VPS | `/etc/anunciadores/application-secrets.properties` |
+
+Copia `application-secrets.example.properties` y completa los valores:
 
 | Propiedad | Descripción |
 |---|---|
-| `server.port` | Puerto (5000) |
 | `spring.datasource.*` | Conexión MySQL (anunciadb) |
 | `cloudflare.r2.*` | Credenciales Cloudflare R2 |
-| `security.jwt.secret` | Secreto JWT |
+| `security.jwt.secret` | Secreto JWT (mínimo 32 caracteres, p. ej. `openssl rand -base64 48`) |
 | `propiedad.telegram.token` | Token bot Telegram |
+| `token` | Token API de la Biblia |
+
+En el VPS el archivo debe poder leerlo el usuario `tomcat`:
+
+```bash
+sudo mkdir -p /etc/anunciadores
+sudo cp application-secrets.properties /etc/anunciadores/
+sudo chown root:tomcat /etc/anunciadores/application-secrets.properties
+sudo chmod 640 /etc/anunciadores/application-secrets.properties
+```
 
 ## Principales endpoints
 
@@ -68,7 +85,7 @@ Todos bajo `/api`, sin prefijo de versión.
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `POST` | `/api/auth/loginReact` | Inicio de sesión (documento + password MD5) |
+| `POST` | `/api/auth/loginReact` | Inicio de sesión (cédula + contraseña, BCrypt) |
 | | | |
 | `GET` | `/api/users` | Listar usuarios |
 | `GET` | `/api/user` | Usuario actual desde token |
@@ -106,23 +123,32 @@ Todos bajo `/api`, sin prefijo de versión.
 
 ## Despliegue
 
-Se empaqueta como WAR para Tomcat:
+Se empaqueta como WAR para el Tomcat 9 del VPS (contexto `/anunciadores-0.0.1-SNAPSHOT`, Nginx
+redirige `https://anunciaig.com/api/` a ese contexto):
 
 ```bash
-./mvnw clean package -DskipTests
+./mvnw clean package            # corre los tests; agrega -DskipTests para omitirlos
+scp target/anunciadores-0.0.1-SNAPSHOT.war root@VPS:/opt/tomcat/webapps/
+# en el VPS:
+chown tomcat:tomcat /opt/tomcat/webapps/anunciadores-0.0.1-SNAPSHOT.war
+systemctl restart tomcat        # nunca arrancar Tomcat con startup.sh como root
 ```
-
-El WAR se genera en `target/anunciadores-0.0.1-SNAPSHOT.war`. Renombrar a `ROOT.war` y copiar a `webapps/` de Tomcat.
 
 ## Base de datos
 
-- Hibernate `ddl-auto=update` crea/actualiza tablas automáticamente.
-- Base: `anunciadb` en MySQL localhost:3306.
-- 35+ tablas: persona, servicio, ministerios, tdc, notificacion, contacto, imagen_mensual, rol, coordinador, etc.
+- En producción `ddl-auto=none`: Hibernate no modifica tablas. Si cambias una entidad, aplica el SQL a mano.
+- En local `application-secrets.properties` puede usar `ddl-auto=update`.
+- Base: `anunciadb` en MySQL localhost:3306. Scripts en `src/main/resources/querys/`.
 
 ## Seguridad
 
-- Spring Security configurado con sesión STATELESS, CSRF desactivado, todos los endpoints permitidos.
-- La autenticación real se hace manualmente vía JWT en los controladores.
-- Clave JWT configurable en `application.properties`.
-- Contraseñas hasheadas con MD5 (legado).
+- Todas las rutas `/api/**` exigen token JWT (`Authorization: Bearer ...`), excepto:
+  login, cambio de contraseña por cédula, registro público, formulario de contacto e imagen del mes.
+- Las acciones de administración (roles, usuarios, ministerios, programación, cursos, reportes,
+  mensajes de contacto, configuración) exigen rol `ADMIN`.
+- Los datos personales (notificaciones, TCD, programación, notas, dashboard) solo los ve su dueño o un ADMIN.
+- El registro público siempre crea rol `USUARIO`; solo un ADMIN puede elegir otro rol.
+- Límite de intentos por IP en login, registro y contacto.
+- Las imágenes se validan por su contenido real (JPG, PNG, WEBP, GIF).
+- Contraseñas en BCrypt; las antiguas en MD5 se migran solas en el siguiente inicio de sesión.
+- Las respuestas nunca incluyen la contraseña ni detalles internos de los errores.

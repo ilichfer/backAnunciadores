@@ -1,4 +1,6 @@
   package  com.anunciadores.util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
   import java.text.ParseException;
   import java.text.SimpleDateFormat;
   import java.time.LocalDate;
@@ -10,6 +12,8 @@
   @Service
   public class UtilDate
   {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UtilDate.class);
+
     public String cargarfechaActualBogotaString() throws ParseException {
 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 ZonedDateTime nowInBogota = ZonedDateTime.now(ZoneId.of("America/Bogota"));
@@ -46,8 +50,8 @@ return fechaActualStr;
     public Date convertLocaldateToDate(LocalDate local) {
 LocalDate localDate = local;
 Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-System.out.println("LocalDate: " + localDate);
-System.out.println("Date: " + date);
+LOGGER.debug("{}", "LocalDate: " + localDate);
+LOGGER.debug("{}", "Date: " + date);
 return date;
     }
     public Date[] getRangoDiaBogota(LocalDate dia) {

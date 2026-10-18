@@ -99,9 +99,9 @@ pasajeError.setContent("[27] Yo soy el Señor, Dios de toda la humanidad. ¿Hay 
 pasajeError.setReference("Jeremías 32:27");
 return pasajeError;
 } catch (Exception e) {
-System.out.println("error de servicio de biblia");
+LOGGER.debug("{}", "error de servicio de biblia");
 this.LOGGER.error("[findVerseDay] " + e.getMessage());
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
 VersiculoDto pasajeError = new VersiculoDto();
 pasajeError.setContent("[27] Yo soy el Señor, Dios de toda la humanidad. ¿Hay algo imposible para mí?");
 pasajeError.setReference("Jeremías 32:27");

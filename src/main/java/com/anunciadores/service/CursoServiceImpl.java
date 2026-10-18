@@ -1,4 +1,6 @@
   package  com.anunciadores.service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
   import com.anunciadores.dto.CursoDto;
   import com.anunciadores.dto.NotasCursoDTO;
   import com.anunciadores.dto.PersonaDto;
@@ -28,6 +30,8 @@ import com.anunciadores.service.interfaces.IConfiguracionService;
   public class CursoServiceImpl
     implements ICursoService
   {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CursoServiceImpl.class);
+
     @Autowired
     private ICursoRepo cursoRepository;
     @Autowired
@@ -139,7 +143,7 @@ Date fechaDate = null;
 fechaDate = dateFormat.parse(fecha);
 Date date = new Date();
 String dateToStr = dateFormat.format(fechaDate);
-System.out.println("fechaInicio  formateada " + dateToStr);
+LOGGER.debug("{}", "fechaInicio  formateada " + dateToStr);
 return dateToStr;
     }
     public List<PersonaDto> buscarNotasXPersonas(int idCurso, List<Persona> estudiantes) {

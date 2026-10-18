@@ -1,13 +1,26 @@
 package com.anunciadores.dto;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+
 public class RegisterPersonaRequestDto {
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 100, message = "El nombre es demasiado largo")
     private String nombre;
+    @NotBlank(message = "El apellido es obligatorio")
+    @Size(max = 100, message = "El apellido es demasiado largo")
     private String apellido;
+    @NotNull(message = "El número de documento es obligatorio")
     private Integer documento;
     private String tipodocumento;
     private String fechanacimiento;
     private String genero;
     private String estadoCivil;
+    @Email(message = "El correo electrónico no es válido")
+    @Size(max = 150, message = "El correo es demasiado largo")
     private String email;
     private String telefono;
     private String celular;

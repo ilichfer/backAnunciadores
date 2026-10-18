@@ -80,7 +80,7 @@ personaSave.setIdMinisterio(idMinisterio);
 personaSave.setIdPersona(idPersona);
 this.personaMinisterioRepoSitory.save(personaSave);
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
       } 
     }
     public Ministry getMinistryWithPositions(Integer idMinisterio) {

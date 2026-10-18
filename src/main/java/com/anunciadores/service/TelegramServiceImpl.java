@@ -53,14 +53,14 @@ String telefonoOriginal = contact.getPhone_number();
 String telefonoRecortado = (telefonoOriginal.length() > 2) ? telefonoOriginal.substring(2) : telefonoOriginal;
 Long chatId = update.getMessage().getChat().getId();
 String nombre = update.getMessage().getFrom().getFirst_name();
-System.out.println("📞 Teléfono limpio: " + telefonoRecortado);
-System.out.println("👤 Nombre: " + nombre);
-System.out.println("💬 Chat ID: " + chatId);
-System.out.println("────────────────────────────");
+log.debug("{}", "📞 Teléfono limpio: " + telefonoRecortado);
+log.debug("{}", "👤 Nombre: " + nombre);
+log.debug("{}", "💬 Chat ID: " + chatId);
+log.debug("{}", "────────────────────────────");
 Optional<List<Persona>> personaTelegram = this.personaRepo.findByCelular(telefonoRecortado);
 if (personaTelegram.isPresent() && ((List)personaTelegram.get()).size() > 1) {
 for (Persona p : personaTelegram.get()) {
-System.out.println("   - Persona encontrada: ID=" + p.getId() + ", Nombre=" + p.getNombre() + ", Celular=" + p.getCelular() + ", TelegramID=" + p.getIdTelegram());
+log.debug("{}", "   - Persona encontrada: ID=" + p.getId() + ", Nombre=" + p.getNombre() + ", Celular=" + p.getCelular() + ", TelegramID=" + p.getIdTelegram());
 p.setIdTelegram(chatId.toString());
 peopleWithIdTelegram.add((Persona)this.personaRepo.save(p));
           }  continue;
@@ -68,7 +68,7 @@ peopleWithIdTelegram.add((Persona)this.personaRepo.save(p));
 ((Persona)((List<Persona>)personaTelegram.get()).get(0)).setIdTelegram(chatId.toString());
 peopleWithIdTelegram.add((Persona)this.personaRepo.save(((List<Persona>)personaTelegram.get()).get(0))); continue;
         } 
-System.out.println("❌ No existe");
+log.debug("{}", "❌ No existe");
       } 
 return peopleWithIdTelegram;
     }
@@ -85,11 +85,11 @@ for (ResultDTO update : actualizacionesSinDuplicados) {
 Long idChatTelegram = update.getMessage().getChat().getId();
 Optional<List<Persona>> list = this.personaRepo.findByIdTelegram(idChatTelegram.toString());
 if (((List)list.get()).size() > 0) {
-System.out.println("❌ Ya tiene telegram asociado");
+log.debug("{}", "❌ Ya tiene telegram asociado");
           continue;
         } 
 getContact(idChatTelegram.toString());
-System.out.println("✅ No tiene telegram asociado");
+log.debug("{}", "✅ No tiene telegram asociado");
 contador++;
       } 
 return contador;
@@ -107,10 +107,10 @@ body.put("chat_id", Long.valueOf(Long.parseLong(s.getIdNotificacionTelegram())))
 body.put("text", "Hola <b>" + s.getEncargado() + "</b>,\neste es un mensaje automático para recordarte que tienes servicio el día <b>" + serv.getFechaServcio() + "</b> en el ministerio de <b>" + serv.getNombreMinisterio() + "</b> en la posición <b>" + s.getPosicion() + "</b>.\n¡Gracias por tu servicio!");
 body.put("disable_notification", Boolean.valueOf(false));
 String respuesta = this.telegramClient.enviarMensajeTelegram(this.telegramToken, body, "HTML");
-System.out.println("📨 Telegram respondió: " + respuesta); continue;
+log.debug("Telegram respondió: {}", respuesta); continue;
             } 
 personasProgramandas.add(s);
-System.out.println(s.getEncargado() + "   ❌ No tiene telegram asociado");
+log.debug("{}", s.getEncargado() + "   ❌ No tiene telegram asociado");
           } 
         } 
 Coordinador cor = this.servicioService.findCoordinador(listProgramacionMinisterio);
@@ -120,7 +120,7 @@ body.put("chat_id", Long.valueOf(Long.parseLong(cor.getPersona().getIdTelegram()
 body.put("text", "Hola <b>" + cor.getPersona().getNombre() + "</b>,\neste es un mensaje automático para recordarte que tienes servicio el día <b>" + this.utilDate.convertDateToString(cor.getFechaServicio()) + "</b> en la posición de <b> Coordinador </b>.\n¡Gracias por tu servicio!");
 body.put("disable_notification", Boolean.valueOf(false));
 String respuesta = this.telegramClient.enviarMensajeTelegram(this.telegramToken, body, "HTML");
-System.out.println("📨 Telegram respondió: " + respuesta);
+log.debug("{}", "📨 Telegram respondió: " + respuesta);
         } 
       } 
 return personasProgramandas;
@@ -144,7 +144,7 @@ replyMarkup.put("resize_keyboard", Boolean.valueOf(true));
 replyMarkup.put("one_time_keyboard", Boolean.valueOf(true));
 body.put("reply_markup", replyMarkup);
 String respuesta = this.telegramClient.enviarMensajeTelegram(this.telegramToken, body, "HTML");
-System.out.println("📨 Telegram respondió: " + respuesta);
+log.debug("{}", "📨 Telegram respondió: " + respuesta);
       } 
 return null;
     }
@@ -152,7 +152,7 @@ return null;
     public ResponseTelegram sendMessage() throws JsonMappingException, JsonProcessingException, ParseException {
 LocalDate fechaActual = LocalDate.now();
 DayOfWeek diaDeLaSemana = fechaActual.getDayOfWeek();
-System.out.println("El día actual es: " + diaDeLaSemana);
+log.debug("{}", "El día actual es: " + diaDeLaSemana);
 if (diaDeLaSemana == DayOfWeek.THURSDAY || diaDeLaSemana == DayOfWeek.SATURDAY) {
 fechaActual = fechaActual.plusDays(1L);
 Date fechaAumentada = Date.valueOf(fechaActual);
@@ -166,9 +166,9 @@ body.put("chat_id", Long.valueOf(Long.parseLong(s.getIdNotificacionTelegram())))
 body.put("text", "Hola <b>" + s.getEncargado() + "</b>,\n este es un mensaje automático para recordarte que tienes servicio el día <b>" + serv.getFechaServcio() + "</b> en el ministerio de <b>" + serv.getNombreMinisterio() + "</b> en la posición <b>" + s.getPosicion() + "</b>. \n ¡Gracias por tu servicio!");
 body.put("disable_notification", Boolean.valueOf(false));
 String respuesta = this.telegramClient.enviarMensajeTelegram(this.telegramToken, body, "HTML");
-System.out.println("📨 Telegram respondió: " + respuesta); continue;
+log.debug("Telegram respondió: {}", respuesta); continue;
               } 
-System.out.println(s.getEncargado() + "   ❌ No tiene telegram asociado");
+log.debug("{}", s.getEncargado() + "   ❌ No tiene telegram asociado");
             } 
           } 
 Coordinador cor = this.servicioService.findCoordinador(listProgramacionMinisterio);
@@ -178,11 +178,11 @@ body.put("chat_id", Long.valueOf(Long.parseLong(cor.getPersona().getIdTelegram()
 body.put("text", "Hola <b>" + cor.getPersona().getNombre() + "</b>,\n este es un mensaje automático para recordarte que tienes servicio el día <b>" + this.utilDate.convertDateToString(cor.getFechaServicio()) + "</b> en la posición de <b> Coordinador </b>. \n¡Gracias por tu servicio!");
 body.put("disable_notification", Boolean.valueOf(false));
 String respuesta = this.telegramClient.enviarMensajeTelegram(this.telegramToken, body, "HTML");
-System.out.println("📨 Telegram respondió: " + respuesta);
+log.debug("{}", "📨 Telegram respondió: " + respuesta);
           } 
         } 
       } else {
-System.out.println("Hoy no ejecutar ña tarea.");
+log.debug("{}", "Hoy no ejecutar ña tarea.");
       } 
 return null;
     }
