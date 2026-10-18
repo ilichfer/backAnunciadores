@@ -62,6 +62,12 @@ private final Logger log = LoggerFactory.getLogger(com.anunciadores.service.TdcS
               saveTcd.setUrlImage(urlCloudflare);
               return (Tdc) this.TdcRepository.save(saveTcd);
           }
+          catch (org.springframework.dao.DataIntegrityViolationException e) {
+              // Ya existe un TCD de hoy para la persona (p. ej. tocó "Subir" varias veces seguidas)
+              log.warn("TCD duplicado para la persona {} el mismo día", idPersona);
+              throw new org.springframework.web.server.ResponseStatusException(
+                      org.springframework.http.HttpStatus.CONFLICT, "Ya subiste tu TCD de hoy");
+          }
 catch (Exception e) {
               log.error("Error inesperado", e);
               throw new RuntimeException(e);
