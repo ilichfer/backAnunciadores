@@ -48,7 +48,7 @@ private final Logger log = LoggerFactory.getLogger(com.anunciadores.service.TdcS
                   throw new RuntimeException();
               }
           } catch (Exception e) {
-              e.printStackTrace();
+              log.error("Error inesperado", e);
               throw new RuntimeException();
           }
           return tdc;
@@ -63,7 +63,7 @@ private final Logger log = LoggerFactory.getLogger(com.anunciadores.service.TdcS
               return (Tdc) this.TdcRepository.save(saveTcd);
           }
 catch (Exception e) {
-              e.printStackTrace();
+              log.error("Error inesperado", e);
               throw new RuntimeException(e);
           }
       }
@@ -100,7 +100,7 @@ catch (Exception e) {
                   return true;
               }
           } catch (Exception e) {
-              e.printStackTrace();
+              log.error("Error inesperado", e);
           }
           return false;
       }
@@ -159,7 +159,7 @@ catch (Exception e) {
           try {
               dto.setPersona(this.personaRepository.findById(Integer.valueOf(tdc.getIdPersona())).get());
           } catch (Exception e) {
-              e.printStackTrace();
+              log.error("Error inesperado", e);
           }
           return dto;
       }

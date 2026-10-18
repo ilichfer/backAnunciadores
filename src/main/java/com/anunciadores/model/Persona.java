@@ -1,4 +1,6 @@
   package  com.anunciadores.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
   import java.io.Serializable;
   import javax.persistence.Column;
   import javax.persistence.Entity;
@@ -30,8 +32,10 @@
     private String tipodocumento;
     @Column(name = "email")
     private String email;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password")
     private String password;
+    @JsonIgnore
     @Column(name = "password_hash_version")
     private Integer passwordHashVersion = 0;
     @Column(name = "genero")

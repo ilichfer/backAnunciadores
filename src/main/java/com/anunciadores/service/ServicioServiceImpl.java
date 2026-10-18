@@ -135,7 +135,7 @@ progServicio.add(servicio);
             }
 this.servicioRepository.saveAll(progServicio);
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
         }
     }
     public Boolean saveCoordinado(CoordinadorDTO cordinador) throws ParseException {
@@ -268,7 +268,7 @@ progServicio.add(servicio);
             }
 this.servicioRepository.saveAll(progServicio);
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
         }
     }
     @Transactional
@@ -309,7 +309,7 @@ Optional<Persona> per = this.personaRepository.findById(Integer.valueOf(idPerson
 return per;
             }
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
         }
 return Optional.empty();
     }
@@ -324,7 +324,7 @@ return per;
                 }
             }
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
         }
 return Optional.empty();
     }
@@ -338,7 +338,7 @@ return per;
                 }
             }
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
         }
 return Optional.empty();
     }
@@ -354,7 +354,7 @@ serSave = (Servicio)this.servicioRepository.save(serSave);
                 }
             }
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
 return false;
         }
 return true;
@@ -425,7 +425,7 @@ obj.forEach(O -> {
 ListServiceDto = buscarMinistarios(ListServicioDto);
 } catch (Exception e) {
 this.LOGGER.error("[findProgramacionByDateGroup] " + e.getMessage());
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
 throw new RuntimeException("[findProgramacionByDateGroup]" + e);
         }
 return ListServiceDto;
@@ -441,7 +441,7 @@ personaSave.setIdPersona(idPersona);
 this.personaMinisterioRepoSitory.save(personaSave);
         }
 catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
         }
     }
     public void agregarPersonasAMinisterio(List<Long> listaPersonas, int idMinisterio) {
@@ -453,7 +453,7 @@ listaPersonas.forEach(p -> {
                 this.personaMinisterioRepoSitory.save(personaSave);
             });
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
         }
     }
     public List<ServicioResponseDto> buscarProgramacionMes(int idPersona) throws ParseException {
@@ -472,10 +472,7 @@ int monthDays = ld.lengthOfMonth();
 int yearDays = ld.lengthOfYear();
 int year = ld.getYear();
 int month = ld.getMonthValue();
-System.out.printf("Mes % 4d de %d tiene %d días%nAño %d tiene %d días", new Object[] {
-Integer.valueOf(month), Integer.valueOf(year), Integer.valueOf(monthDays),
-Integer.valueOf(year), Integer.valueOf(yearDays)
-                });
+LOGGER.debug("Mes {} de {} tiene {} días; año {} tiene {} días", month, year, monthDays, year, yearDays);
 String fechainicial = "" + year + "-" + month + "-1";
 String fechaFinal = "" + year + "-" + month + "-" + monthDays;
 Date date1 = sdf.parse(fechainicial);
@@ -543,7 +540,7 @@ return response;
         try {
 for (int i = 0; i < servidores.getEncargado().size(); i++) {
 if (((String)servidores.getEncargado().get(i)).equals(Integer.valueOf(89898989))) {
-System.out.println(servidores.getEncargado().get(i));
+LOGGER.debug("{}", servidores.getEncargado().get(i));
                 }
             }
 Set<String> set = new HashSet<>(servidores.getEncargado());
@@ -553,7 +550,7 @@ return Boolean.valueOf(false);
 return Boolean.valueOf(true);
         }
 catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
 return Boolean.valueOf(false);
         }
     }
@@ -561,7 +558,7 @@ return Boolean.valueOf(false);
 Persona[] pDuplicada = { new Persona() };
 int cont = 0;
 for (String e : servidores.getEncargado()) {
-System.out.println("inicia ------> " + e);
+LOGGER.debug("{}", "inicia ------> " + e);
 cont = 0;
 for (String enc : servidores.getEncargado()) {
 if (enc.equals(e)) {
@@ -569,10 +566,10 @@ if (enc.equals(e)) {
 cont++;
                     }
 catch (Exception ex) {
-ex.printStackTrace();
+LOGGER.error("Error inesperado", ex);
                     }
                 }
-System.out.println("interno enc " + enc + " " + cont);
+LOGGER.debug("{}", "interno enc " + enc + " " + cont);
 if (cont > 1) {
 return this.personaRepository.findById(Integer.valueOf(Integer.parseInt(e))).get();
                 }
@@ -670,7 +667,7 @@ Date finalFechaActual = fechaActual;
 ListServiceDto = buscarMinistarios(ListServicioDto);
 } catch (Exception e) {
 this.LOGGER.error("[findProgramacionByDateGroup] " + e.getMessage());
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
 throw new RuntimeException("[findProgramacionByDateGroup]" + e);
         }
 prog.setMinistries(ministries);
@@ -723,7 +720,7 @@ Date finalFechaActual = fechaActual;
             }
 } catch (Exception e) {
 this.LOGGER.error("[findProgramacionByDateGroup] " + e.getMessage());
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
 throw new RuntimeException("[findProgramacionByDateGroup]" + e);
         }
 prog.setMinistries(ministries);
@@ -804,7 +801,7 @@ String date_s = object[0].toString();
 SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 Date date1 = dt.parse(date_s);
 SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd");
-System.out.println(dt1.format(date1));
+LOGGER.debug("{}", dt1.format(date1));
 servicioDto.setFechaServcio(dt1.format(date1));
 servicioDto.setEncargado(object[1].toString());
 servicioDto.setPosicion(object[2].toString());

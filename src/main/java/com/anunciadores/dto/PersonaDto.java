@@ -1,4 +1,5 @@
   package  com.anunciadores.dto;
+import com.fasterxml.jackson.annotation.JsonProperty;
   import com.anunciadores.dto.AsignacionServicioDTO;
   import com.anunciadores.dto.MensajesDTO;
   import com.anunciadores.dto.NotasCursoDTO;
@@ -19,6 +20,7 @@
     private String fechanacimiento;
     private String tipodocumento;
     private String email;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private boolean consolidacion;
     private List<Rol> roles;

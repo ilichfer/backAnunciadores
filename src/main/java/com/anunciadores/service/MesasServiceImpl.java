@@ -6,7 +6,6 @@ import com.anunciadores.model.Persona;
 import com.anunciadores.repository.IActividadRepo;
 import com.anunciadores.repository.IMesasRepo;
 import com.anunciadores.repository.IPersonaRepo;
-import com.anunciadores.repository.MesasRepoImpl;
 import com.anunciadores.service.interfaces.IMesasService;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +19,6 @@ implements IMesasService
 private IActividadRepo ActividadRepository;
 @Autowired
 private IMesasRepo mesasRepository;
-@Autowired
-private MesasRepoImpl mesaDAO;
 @Autowired
 private IPersonaRepo personaRepo;
 List<Curso> listaActividades = new ArrayList<>();

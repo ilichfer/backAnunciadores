@@ -98,6 +98,8 @@ return this.personaRepository.findUsuarios();
     public Persona save(Persona persona) {
         return save(persona, 2);
     }
+    /** Guarda la persona y su rol en una sola transaccion (o se guardan ambos o ninguno). */
+    @Transactional
     public Persona save(Persona persona, int idRol) {
 RolPersona rolPersona = new RolPersona();
 persona.setPassword(encriptar(persona.getPassword()));
@@ -172,7 +174,7 @@ personadto.setUser(true);
         }
       }
 catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
       } 
 return personadto;
     }
@@ -187,14 +189,14 @@ return this.personaRepository.findPersonaSinCurso(Integer.valueOf(idCurso));
       try {
 this.personaRepository.deletePersonaConCurso(idPersona, idCurso);
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
       } 
     }
     public void eliminarPersonaMinisterio(int idPersona, int idMinisterio) {
       try {
 this.personaRepository.deletePersonaMinisterio(idPersona, idMinisterio);
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
       } 
     }
     public void agregarPersonaCurso(int idPersona, int idCurso) {
@@ -205,7 +207,7 @@ inscripcion.setIdPersona(idPersona);
 Inscripciones inscripciones1 = (Inscripciones)this.inscripcionesRepository.save(inscripcion);
       }
 catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
       } 
     }
     public void agregarPersonaActividad(int idPersona, int idActividad) {
@@ -216,7 +218,7 @@ inscripcion.setIdPersona(idPersona);
 this.inscripcionActividadRepository.save(inscripcion);
       }
 catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
       } 
     }
     public PersonaDto buscarByDocumento(Integer doc) {
@@ -260,7 +262,7 @@ personadto = new PersonaDto();
         }
 } catch (Exception e) {
 this.LOGGER.error("[buscarByDocumento] " + e.getMessage());
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
 personadto = new PersonaDto();
 personadto.setId(1);
 throw new RuntimeException("[buscarByDocumento]" + e.getMessage());
@@ -379,7 +381,7 @@ per.setFechanacimiento(dto.getFechanacimiento());
 per.setTelefono(dto.getTelefono());
 per.setPassword(dto.getPassword());
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
       } 
 return per;
     }
@@ -457,13 +459,21 @@ if (!roles.isEmpty()) {
   }
 }
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
       } 
 return dto;
     }
+    /** Cambia el rol de la persona; si no tenia ninguno se le crea. */
+    @Transactional
     public void findUsuariosRol(int idPersona, int idRolNuevo) {
       List<RolPersona> rol = this.rolesPersonaRepository.findRolByidPersona(idPersona);
-      RolPersona rolUpdate = rol.get(0);
+      RolPersona rolUpdate;
+      if (rol == null || rol.isEmpty()) {
+        rolUpdate = new RolPersona();
+        rolUpdate.setIdPersona(idPersona);
+      } else {
+        rolUpdate = rol.get(0);
+      }
       rolUpdate.setIdRol(idRolNuevo);
       this.rolesPersonaRepository.save(rolUpdate);
     }
@@ -491,7 +501,7 @@ List<Rol> roles = this.rolesDao.buscarRoles(persona.getId());
 roles.forEach(r -> dto.setRolUnico(r));
 dto.setRoles(roles);
 } catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
       } 
 return dto;
     }
@@ -505,7 +515,7 @@ dto.setFechanacimiento(object[2].toString());
 dto.setCumpleActual(dia.equals(object[2].toString()));
       }
 catch (Exception e) {
-e.printStackTrace();
+LOGGER.error("Error inesperado", e);
       } 
 return dto;
     }
@@ -524,7 +534,7 @@ listServices.forEach(serv -> {
                 asig.setPosiciones(object[1].toString());
                 asignacion.add(asig);
 } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error("Error inesperado", e);
               } 
             });
       } 
