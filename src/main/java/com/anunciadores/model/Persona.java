@@ -8,6 +8,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
   import javax.persistence.GenerationType;
   import javax.persistence.Id;
   import javax.persistence.Table;
+  import javax.persistence.Temporal;
+  import javax.persistence.TemporalType;
+  import java.util.Date;
   @Entity
   @Table(name = "persona")
   public class Persona
@@ -78,6 +81,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
     private Boolean consolidacion;
     @Column(name = "estado")
     private Boolean estado;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "fecha_registro")
+    private Date fechaRegistro;
+    /** Token secreto para suscribir el calendario personal (Google Calendar). */
+    @JsonIgnore
+    @Column(name = "calendario_token", length = 64, unique = true)
+    private String calendarioToken;
     public Integer getId() {
 return this.id;
     }
@@ -269,5 +279,17 @@ return this.idTelegram;
     }
     public void setIdTelegram(String idTelegram) {
 this.idTelegram = idTelegram;
+    }
+      public Date getFechaRegistro() {
+        return this.fechaRegistro;
+    }
+    public void setFechaRegistro(Date fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
+    }
+    public String getCalendarioToken() {
+        return this.calendarioToken;
+    }
+    public void setCalendarioToken(String calendarioToken) {
+        this.calendarioToken = calendarioToken;
     }
   }

@@ -22,4 +22,14 @@ public interface ITdcRepo extends JpaRepository<Tdc, Integer> {
   @Modifying
   @Query("select t from Tdc t join Persona p on t.idPersona  = p.id where t.fechaCreacion BETWEEN :dateStart and :dateEnd and p.id = :idPersona order by t.fechaCreacion desc")
   List<Tdc> findAllBetweenDatesByPersona(@Param("dateStart") Date paramDate1, @Param("dateEnd") Date paramDate2, @Param("idPersona") int paramInt);
+
+  /** Dias (sin repetir) en que la persona subio su TCD, del mas reciente al mas antiguo. */
+  @Query("select distinct t.fechaCreacion from Tdc t where t.idPersona = :idPersona order by t.fechaCreacion desc")
+  List<Date> findFechasByPersona(@Param("idPersona") int idPersona);
+  /** Personas que subieron al menos un TCD en el rango. */
+  @Query("select distinct t.idPersona from Tdc t where t.fechaCreacion between :desde and :hasta")
+  List<Integer> findPersonasConTcd(@Param("desde") Date desde, @Param("hasta") Date hasta);
+  /** Pares (idPersona, fecha) distintos de TCD en el rango: un TCD por persona por dia. */
+  @Query("select distinct t.idPersona, t.fechaCreacion from Tdc t where t.fechaCreacion between :desde and :hasta")
+  List<Object[]> findDiasTcd(@Param("desde") Date desde, @Param("hasta") Date hasta);
 }

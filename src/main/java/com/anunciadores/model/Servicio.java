@@ -7,6 +7,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 @Entity
 @Table(name = "servicio")
 public class Servicio
@@ -27,6 +29,14 @@ private int idMinisterio;
 Date fechaServicio;
 @Column(name = "asistencia")
 String asistencia;
+/** PENDIENTE (null), CONFIRMADO o NO_PUEDE: respuesta del servidor a su turno. */
+@Column(name = "confirmacion", length = 20)
+private String confirmacion;
+@Column(name = "motivo_confirmacion", length = 300)
+private String motivoConfirmacion;
+@Temporal(TemporalType.TIMESTAMP)
+@Column(name = "fecha_confirmacion")
+private Date fechaConfirmacion;
 public int getId() {
 return this.id;
 }
@@ -62,5 +72,23 @@ return this.asistencia;
 }
 public void setAsistencia(String asistencia) {
 this.asistencia = asistencia;
+}
+public String getConfirmacion() {
+return this.confirmacion;
+}
+public void setConfirmacion(String confirmacion) {
+this.confirmacion = confirmacion;
+}
+public String getMotivoConfirmacion() {
+return this.motivoConfirmacion;
+}
+public void setMotivoConfirmacion(String motivoConfirmacion) {
+this.motivoConfirmacion = motivoConfirmacion;
+}
+public Date getFechaConfirmacion() {
+return this.fechaConfirmacion;
+}
+public void setFechaConfirmacion(Date fechaConfirmacion) {
+this.fechaConfirmacion = fechaConfirmacion;
 }
 }

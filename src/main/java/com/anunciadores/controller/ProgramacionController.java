@@ -9,6 +9,7 @@ import com.anunciadores.model.Coordinador;
 import com.anunciadores.model.Ministerio;
 import com.anunciadores.model.Persona;
 import com.anunciadores.security.CurrentUser;
+import com.anunciadores.service.AuditoriaService;
 import com.anunciadores.service.interfaces.IMInisteryService;
 import com.anunciadores.service.interfaces.INotificacionService;
 import com.anunciadores.service.interfaces.IPersonaService;
@@ -19,6 +20,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +61,9 @@ public class ProgramacionController {
     @Autowired
     private UtilDate utilDate;
 
+    @Autowired
+    private AuditoriaService auditoria;
+
     @GetMapping("/events")
     public ResponseEntity<ProgramationDto> events() throws ParseException {
         ProgramationDto result = this.servicioService.findNextServices(this.utilDate.cargarfechaActualBogotaDate());
@@ -74,6 +80,9 @@ public class ProgramacionController {
     @PostMapping("/updateprog")
     public ResponseEntity<Void> updateprog(@RequestBody updateServiceRequest request) throws ParseException {
         this.ministeryService.updateService(request);
+        auditoria.registrar(AuditoriaService.PROGRAMACION, "servicio", request.getDate(),
+                "Programación editada: " + request.getMinistry() + " el " + request.getDate()
+                        + " (" + (request.getAssignments() != null ? request.getAssignments().size() : 0) + " posiciones)");
         return ResponseEntity.noContent().build();
     }
 
@@ -102,6 +111,12 @@ public class ProgramacionController {
         if (!Boolean.TRUE.equals(guardado)) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al guardar coordinador");
         }
+        Persona coordinadorPersona = this.personaService.findPersonaById(cordinador.getIdPersona());
+        auditoria.registrar(AuditoriaService.COORDINADOR, "coordinador", cordinador.getFechaString(),
+                "Coordinador del " + cordinador.getFechaString() + ": "
+                        + (coordinadorPersona != null
+                        ? coordinadorPersona.getNombre() + " " + coordinadorPersona.getApellido()
+                        : "persona " + cordinador.getIdPersona()));
         return ResponseEntity.ok(Boolean.TRUE);
     }
 
@@ -123,6 +138,10 @@ public class ProgramacionController {
     @PostMapping("/saveService")
     public ResponseEntity<List<Persona>> saveService(@RequestBody List<ServiceDTO> request) {
         List<Persona> asignados = this.servicioService.saveProgram(request);
+        auditoria.registrar(AuditoriaService.PROGRAMACION, "servicio", null, "Programación guardada: "
+                + request.size() + " asignaciones para "
+                + request.stream().map(ServiceDTO::getFechaServicio).filter(Objects::nonNull)
+                        .map(Object::toString).distinct().collect(Collectors.joining(", ")));
         for (ServiceDTO dto : request) {
             if (dto.getIdPersona() != null && dto.getIdMinisterio() != null) {
                 notificarAsignacion(dto);

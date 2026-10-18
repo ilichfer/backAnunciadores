@@ -10,6 +10,7 @@ import com.anunciadores.repository.INotasCursoRepo;
 import com.anunciadores.repository.IPersonaRepo;
 import com.anunciadores.repository.InscripcionRepo;
 import com.anunciadores.security.CurrentUser;
+import com.anunciadores.service.AuditoriaService;
 import com.anunciadores.service.interfaces.ICursoService;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -48,6 +49,9 @@ public class CursoController {
     @Autowired
     private INotasCursoRepo notasCursoRepo;
 
+    @Autowired
+    private AuditoriaService auditoria;
+
     @GetMapping("/cursos")
     public ResponseEntity<List<Curso>> listarCursos() {
         return ResponseEntity.ok(cursoService.findAll());
@@ -60,18 +64,25 @@ public class CursoController {
 
     @PostMapping("/cursos")
     public ResponseEntity<Curso> crearCurso(@RequestBody CursoDto cursoDto) throws ParseException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cursoService.save(cursoDto));
+        Curso curso = cursoService.save(cursoDto);
+        auditoria.registrar(AuditoriaService.CURSO, "curso", curso != null ? curso.getId() : null,
+                "Curso creado: " + cursoDto.getNombreCurso());
+        return ResponseEntity.status(HttpStatus.CREATED).body(curso);
     }
 
     @PutMapping("/cursos/{id}")
     public ResponseEntity<Curso> actualizarCurso(@PathVariable int id, @RequestBody CursoDto cursoDto) throws ParseException {
         cursoDto.setId(id);
-        return ResponseEntity.ok(cursoService.save(cursoDto));
+        Curso curso = cursoService.save(cursoDto);
+        auditoria.registrar(AuditoriaService.CURSO, "curso", id, "Curso editado: " + cursoDto.getNombreCurso());
+        return ResponseEntity.ok(curso);
     }
 
     @PutMapping("/cursos/{id}/desactivar")
     public ResponseEntity<String> desactivarCurso(@PathVariable int id) throws ParseException {
-        cursoService.desactivarCurso(buscarCurso(id));
+        Curso curso = buscarCurso(id);
+        cursoService.desactivarCurso(curso);
+        auditoria.registrar(AuditoriaService.CURSO, "curso", id, "Curso desactivado: " + curso.getNombreCurso());
         return ResponseEntity.ok("Curso desactivado correctamente");
     }
 
@@ -93,6 +104,7 @@ public class CursoController {
         inscripcion.setIdCurso(id);
         inscripcion.setIdPersona(idPersona);
         inscripcionRepo.save(inscripcion);
+        auditoria.registrar(AuditoriaService.CURSO, "curso", id, nombre(idPersona) + " inscrito(a) en el curso " + id);
         return ResponseEntity.status(HttpStatus.CREATED).body("Estudiante inscrito correctamente");
     }
 
@@ -100,6 +112,7 @@ public class CursoController {
     @Transactional
     public ResponseEntity<String> desinscribirEstudiante(@PathVariable int id, @PathVariable int idPersona) {
         inscripcionRepo.deleteByIdCursoAndIdPersona(id, idPersona);
+        auditoria.registrar(AuditoriaService.CURSO, "curso", id, nombre(idPersona) + " retirado(a) del curso " + id);
         return ResponseEntity.ok("Estudiante desinscrito correctamente");
     }
 
@@ -130,6 +143,8 @@ public class CursoController {
         cursoDto.setValorTotal(curso.getValorTotal());
         cursoDto.setProfesor(idPersona);
         cursoService.save(cursoDto);
+        auditoria.registrar(AuditoriaService.CURSO, "curso", id,
+                "Profesor del curso " + curso.getNombreCurso() + ": " + nombre(idPersona));
         return ResponseEntity.ok("Profesor asignado correctamente");
     }
 
@@ -157,7 +172,11 @@ public class CursoController {
         notas.setNotaAsistencia(nota(body, "notaAsistencia"));
         notas.setNotaPractica(nota(body, "notaPractica"));
         notas.setNotaExamenFinal(nota(body, "notaExamenFinal"));
-        return ResponseEntity.ok(cursoService.saveNotasCurso(notas));
+        NotasCurso guardada = cursoService.saveNotasCurso(notas);
+        auditoria.registrar(AuditoriaService.NOTA, "curso", id, "Notas de " + nombre(idPersona) + " en el curso "
+                + id + ": maestro " + notas.getNotaMaestro() + ", asistencia " + notas.getNotaAsistencia()
+                + ", práctica " + notas.getNotaPractica() + ", examen " + notas.getNotaExamenFinal());
+        return ResponseEntity.ok(guardada);
     }
 
     /** Historial de notas: cada persona ve el suyo; ADMIN puede ver el de cualquiera. */
@@ -186,5 +205,10 @@ public class CursoController {
     private static double nota(Map<String, Object> body, String campo) {
         Object valor = body.get(campo);
         return valor instanceof Number ? ((Number) valor).doubleValue() : 0;
+    }
+
+    private String nombre(int idPersona) {
+        return personaRepo.findById(idPersona).map(p -> p.getNombre() + " " + p.getApellido())
+                .orElse("Persona " + idPersona);
     }
 }

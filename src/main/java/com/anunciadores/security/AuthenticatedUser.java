@@ -12,11 +12,21 @@ public class AuthenticatedUser {
     private final Integer id;
     private final String cedula;
     private final String rol;
+    private final String nombre;
 
     public AuthenticatedUser(Integer id, String cedula, String rol) {
+        this(id, cedula, rol, null);
+    }
+
+    public AuthenticatedUser(Integer id, String cedula, String rol, String nombre) {
         this.id = id;
         this.cedula = cedula;
         this.rol = rol;
+        this.nombre = nombre;
+    }
+
+    public String getNombre() {
+        return nombre;
     }
 
     public Integer getId() {

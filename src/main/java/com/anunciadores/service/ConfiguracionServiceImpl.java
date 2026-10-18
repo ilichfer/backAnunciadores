@@ -64,4 +64,53 @@ public class ConfiguracionServiceImpl implements IConfiguracionService {
             configuracionRepo.save(config);
         }
     }
+
+    // ── Preferencias de envios automaticos ────────────────────────────────────
+
+    public static final String WA_CUMPLEANOS = "WA_CUMPLEANOS";
+    public static final String WA_RECORDATORIO_TCD = "WA_RECORDATORIO_TCD";
+    public static final String WA_AUSENCIAS = "WA_AUSENCIAS";
+    public static final String WA_RESUMEN_SEMANAL = "WA_RESUMEN_SEMANAL";
+
+    private static final Map<String, String> PREFERENCIAS = new LinkedHashMap<>();
+    static {
+        PREFERENCIAS.put(WA_CUMPLEANOS, "Enviar saludo de cumpleaños por WhatsApp");
+        PREFERENCIAS.put(WA_RECORDATORIO_TCD, "Recordar por WhatsApp a quien no ha subido su TCD");
+        PREFERENCIAS.put(WA_AUSENCIAS, "Avisar por WhatsApp al coordinador cuando alguien no puede servir");
+        PREFERENCIAS.put(WA_RESUMEN_SEMANAL, "Enviar el resumen semanal por WhatsApp a los administradores");
+    }
+
+    @Override
+    public Map<String, Boolean> findPreferenciasEnvio() {
+        Map<String, Boolean> resultado = new LinkedHashMap<>();
+        Map<String, Double> guardadas = new LinkedHashMap<>();
+        for (Configuracion c : configuracionRepo.findByClaveIn(new java.util.ArrayList<>(PREFERENCIAS.keySet()))) {
+            guardadas.put(c.getClave(), c.getValor());
+        }
+        for (String clave : PREFERENCIAS.keySet()) {
+            Double valor = guardadas.get(clave);
+            resultado.put(clave, valor != null && valor >= 1);
+        }
+        return resultado;
+    }
+
+    @Override
+    @Transactional
+    public void savePreferenciasEnvio(Map<String, Boolean> preferencias) {
+        for (Map.Entry<String, String> entrada : PREFERENCIAS.entrySet()) {
+            Boolean activo = preferencias.get(entrada.getKey());
+            if (activo == null) {
+                continue;
+            }
+            Configuracion config = configuracionRepo.findByClave(entrada.getKey())
+                    .orElse(new Configuracion(entrada.getKey(), 0, entrada.getValue()));
+            config.setValor(activo ? 1 : 0);
+            configuracionRepo.save(config);
+        }
+    }
+
+    @Override
+    public boolean isEnvioActivo(String clave) {
+        return configuracionRepo.findByClave(clave).map(c -> c.getValor() >= 1).orElse(false);
+    }
 }

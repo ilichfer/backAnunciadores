@@ -14,6 +14,11 @@
     private String celular;
     private String idNotificacionTelegram;
     private List<ItemCombo> asistenciaList;
+    private Integer idServicio;
+    private Integer idPersona;
+    /** null = pendiente, CONFIRMADO o NO_PUEDE */
+    private String confirmacion;
+    private String motivoConfirmacion;
     public String getPosicion() {
 return this.posicion;
     }
@@ -70,4 +75,28 @@ return this.celular;
     public void setCelular(String celular) {
 this.celular = celular;
     }
-  }
+      public Integer getIdServicio() {
+        return idServicio;
+    }
+    public void setIdServicio(Integer idServicio) {
+        this.idServicio = idServicio;
+    }
+    public Integer getIdPersona() {
+        return idPersona;
+    }
+    public void setIdPersona(Integer idPersona) {
+        this.idPersona = idPersona;
+    }
+    public String getConfirmacion() {
+        return confirmacion;
+    }
+    public void setConfirmacion(String confirmacion) {
+        this.confirmacion = confirmacion;
+    }
+    public String getMotivoConfirmacion() {
+        return motivoConfirmacion;
+    }
+    public void setMotivoConfirmacion(String motivoConfirmacion) {
+        this.motivoConfirmacion = motivoConfirmacion;
+    }
+}

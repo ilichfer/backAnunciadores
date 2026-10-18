@@ -16,11 +16,37 @@ public class NotificacionServiceImpl implements INotificacionService {
     private final Logger log = LoggerFactory.getLogger(NotificacionServiceImpl.class);
     @Autowired
     private INotificacionRepo notificacionRepo;
+
+    @Autowired
+    private NotificacionPushService pushService;
+
+    /** Seccion de la app que abre la notificacion push segun su tipo. */
+    private static String urlPorTipo(String tipo) {
+        if (tipo == null) {
+            return "/";
+        }
+        switch (tipo) {
+            case "ASIGNACION": return "/#/profile";
+            case "AUSENCIA": return "/#/calendario";
+            case "TCD_RECORDATORIO": return "/#/tcd";
+            case "CUMPLEANOS": return "/#/birthdays";
+            case "RESUMEN_SEMANAL": return "/#/panel-pastor";
+            default: return "/";
+        }
+    }
+
+    private void enviarPush(Notificacion n) {
+        if (n != null) {
+            pushService.enviar(n.getIdPersona(), n.getTitulo(), n.getMensaje(), urlPorTipo(n.getTipo()));
+        }
+    }
     @Override
     @Transactional
     public Notificacion crearNotificacion(Notificacion notificacion) {
         try {
-            return notificacionRepo.save(notificacion);
+            Notificacion guardada = notificacionRepo.save(notificacion);
+            enviarPush(guardada);
+            return guardada;
         } catch (Exception e) {
             log.error("Error al crear notificación: ", e);
             return null;
@@ -98,6 +124,6 @@ public class NotificacionServiceImpl implements INotificacionService {
         notificacion.setLeida(false);
         notificacion.setEnviada(false);
         notificacion.setFechaCreacion(new Date());
-        notificacionRepo.save(notificacion);
+        enviarPush(notificacionRepo.save(notificacion));
     }
 }

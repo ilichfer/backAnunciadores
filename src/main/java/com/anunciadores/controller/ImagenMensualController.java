@@ -2,6 +2,7 @@ package com.anunciadores.controller;
 
 import com.anunciadores.dto.ImagenMensualDto;
 import com.anunciadores.model.ImagenMensual;
+import com.anunciadores.service.AuditoriaService;
 import com.anunciadores.service.interfaces.IImagenMensualService;
 import com.anunciadores.service.interfaces.IR2UploadService;
 import java.io.IOException;
@@ -36,6 +37,9 @@ public class ImagenMensualController {
     @Autowired
     private IR2UploadService r2UploadService;
 
+    @Autowired
+    private AuditoriaService auditoria;
+
     @GetMapping("/{tipo}")
     public ResponseEntity<ImagenMensualDto> getImagenMensual(@PathVariable String tipo) {
         ImagenMensualDto dto = this.imagenMensualService.getImagenActual(tipo);
@@ -61,6 +65,8 @@ public class ImagenMensualController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Error al guardar el registro en la base de datos");
         }
+        auditoria.registrar(AuditoriaService.IMAGEN_MES, "imagen_mensual", guardada.getId(),
+                "Imagen del mes (" + tipo + ") " + mesFinal + "/" + anioFinal);
         LOGGER.info("Imagen mensual guardada: tipo={}, mes={}, anio={}, url={}", tipo, mesFinal, anioFinal, imageUrl);
         return ResponseEntity.ok(new ImagenMensualDto(
                 guardada.getUrl(), guardada.getMes(), guardada.getAnio(), guardada.getTipo()));

@@ -78,7 +78,9 @@ public class DashboardController {
         int totalServiciosMes = serviciosMes.size();
         int serviciosAsistidos = 0;
         for (Servicio s : serviciosMes) {
-            if ("ASISTIO".equalsIgnoreCase(s.getAsistencia())) {
+            String asistencia = s.getAsistencia();
+            if ("PRESENTE".equalsIgnoreCase(asistencia) || "TARDE".equalsIgnoreCase(asistencia)
+                    || "ASISTIO".equalsIgnoreCase(asistencia)) {
                 serviciosAsistidos++;
             }
         }

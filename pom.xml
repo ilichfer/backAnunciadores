@@ -79,6 +79,18 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Notificaciones push (Web Push + VAPID) -->
+		<dependency>
+			<groupId>nl.martijndwars</groupId>
+			<artifactId>web-push</artifactId>
+			<version>5.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>1.78.1</version>
+		</dependency>
+
 		<!-- AWS SDK S3 para Cloudflare R2 -->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
@@ -124,6 +136,23 @@
 				<version>2021.0.9</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+
+			<!-- Misma version de BouncyCastle en todos los modulos; jose4j sin CVEs conocidos -->
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk18on</artifactId>
+				<version>1.78.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcutil-jdk18on</artifactId>
+				<version>1.78.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bitbucket.b_c</groupId>
+				<artifactId>jose4j</artifactId>
+				<version>0.9.6</version>
 			</dependency>
 
 			<!-- BOM AWS SDK v2 compatible con Java 11 -->

@@ -9,11 +9,13 @@ import com.anunciadores.model.Persona;
 import com.anunciadores.model.Rol;
 import com.anunciadores.security.CurrentUser;
 import com.anunciadores.security.RateLimiter;
+import com.anunciadores.service.AuditoriaService;
 import com.anunciadores.service.interfaces.IPersonaService;
 import com.anunciadores.service.interfaces.IServicioService;
 import com.anunciadores.util.UtilDate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -51,6 +53,9 @@ public class PersonaController {
 
     @Autowired
     private RateLimiter rateLimiter;
+
+    @Autowired
+    private AuditoriaService auditoria;
 
     @GetMapping("/user")
     public ResponseEntity<UserResponseDto> getUsuarioLogueado(HttpServletRequest request) {
@@ -104,6 +109,8 @@ public class PersonaController {
             persona.setEstado(Boolean.TRUE);
             Persona personaSave = this.personaService.savePassword(persona);
             if (personaSave != null) {
+                auditoria.registrar(AuditoriaService.CAMBIO_CONTRASENA, "persona", personaSave.getId(),
+                        "Cambio de contraseña por cédula de " + personaSave.getNombre() + " " + personaSave.getApellido());
                 return ResponseEntity.status(HttpStatus.ACCEPTED).body(personaSave);
             }
         }
@@ -116,6 +123,8 @@ public class PersonaController {
         if (retorno == null || retorno.getId() == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se pudo actualizar el estado del usuario");
         }
+        auditoria.registrar(AuditoriaService.CAMBIO_ESTADO_USUARIO, "persona", idpersona,
+                (active ? "Activó" : "Desactivó") + " a " + retorno.getNombre() + " " + retorno.getApellido());
         return ResponseEntity.ok(retorno);
     }
 
@@ -133,6 +142,10 @@ public class PersonaController {
                     + Rol.ID_USER + " (SERVIDOR) o " + Rol.ID_USUARIO + " (USUARIO)");
         }
         this.personaService.findUsuariosRol(idPersona, idRol);
+        Persona persona = this.personaService.findPersonaById(idPersona);
+        auditoria.registrar(AuditoriaService.CAMBIO_ROL, "persona", idPersona, "Rol de "
+                + (persona != null ? persona.getNombre() + " " + persona.getApellido() : "persona " + idPersona)
+                + " cambiado a " + nombreRol);
         return ResponseEntity.ok("Rol actualizado a " + nombreRol);
     }
 
@@ -191,6 +204,7 @@ public class PersonaController {
         persona.setConsolidacion(request.getConsolidacion());
         persona.setPassword(request.getPassword() != null ? request.getPassword() : "");
         persona.setEstado(true);
+        persona.setFechaRegistro(new Date());
 
         int idRol = Rol.ID_USUARIO;
         Integer rolSolicitado = request.getRol();
@@ -199,6 +213,9 @@ public class PersonaController {
             idRol = rolSolicitado;
         }
         Persona saved = this.personaService.save(persona, idRol);
+        auditoria.registrar(AuditoriaService.REGISTRO_PERSONA, "persona", saved.getId(),
+                (esAdmin ? "Registro desde administración de " : "Registro público de ")
+                        + persona.getNombre() + " " + persona.getApellido() + " (rol " + idRol + ")");
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 

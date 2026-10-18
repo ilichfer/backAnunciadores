@@ -4,6 +4,8 @@ import com.anunciadores.dto.AddPersonaRequest;
 import com.anunciadores.dto.Ministry;
 import com.anunciadores.dto.PersonaDto;
 import com.anunciadores.dto.PosicionDto;
+import com.anunciadores.model.Persona;
+import com.anunciadores.service.AuditoriaService;
 import com.anunciadores.service.interfaces.IMInisteryService;
 import com.anunciadores.service.interfaces.IPersonaService;
 import com.anunciadores.service.interfaces.IServicioService;
@@ -36,6 +38,9 @@ public class MinisterioController {
     @Autowired
     private IPersonaService personaService;
 
+    @Autowired
+    private AuditoriaService auditoria;
+
     @GetMapping("/ministries")
     public ResponseEntity<List<Ministry>> ministries() {
         return ResponseEntity.ok(this.ministeryService.getAllministriesWithPositions());
@@ -58,12 +63,16 @@ public class MinisterioController {
     @PostMapping("/ministries/addposition")
     public ResponseEntity<Void> addPositionToMinistry(@RequestBody PosicionDto posicionDto) {
         this.servicioService.savePosicion(posicionDto);
+        auditoria.registrar(AuditoriaService.MINISTERIO, "ministerio", posicionDto.getIdMinisterio(),
+                "Nueva posición '" + posicionDto.getNombrePosicion() + "' en el ministerio " + posicionDto.getIdMinisterio());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/ministeries/addperson")
     public ResponseEntity<Void> addPersonaToMinistry(@RequestBody AddPersonaRequest request) {
         this.ministeryService.agregarPersonasAMinisterio(request.getIdPersona(), request.getIdMinisterio());
+        auditoria.registrar(AuditoriaService.MINISTERIO, "ministerio", request.getIdMinisterio(),
+                nombre(request.getIdPersona()) + " agregado(a) al ministerio " + request.getIdMinisterio());
         return ResponseEntity.noContent().build();
     }
 
@@ -71,6 +80,13 @@ public class MinisterioController {
     public ResponseEntity<List<PersonaDto>> deletePersonaFromMinistry(@PathVariable int idMinisterio,
                                                                       @PathVariable int idPersona) {
         this.personaService.eliminarPersonaMinisterio(idPersona, idMinisterio);
+        auditoria.registrar(AuditoriaService.MINISTERIO, "ministerio", idMinisterio,
+                nombre(idPersona) + " retirado(a) del ministerio " + idMinisterio);
         return ResponseEntity.ok(this.servicioService.findPersonaByidMnisterio(idMinisterio));
+    }
+
+    private String nombre(Integer idPersona) {
+        Persona p = this.personaService.findPersonaById(idPersona);
+        return p != null ? p.getNombre() + " " + p.getApellido() : "Persona " + idPersona;
     }
 }

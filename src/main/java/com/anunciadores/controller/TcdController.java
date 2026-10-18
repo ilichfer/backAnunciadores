@@ -4,6 +4,7 @@ import com.anunciadores.auth.dto.reporRequest;
 import com.anunciadores.dto.TdcDto;
 import com.anunciadores.dto.TdcReporteDto;
 import com.anunciadores.security.CurrentUser;
+import com.anunciadores.service.TcdRachaService;
 import com.anunciadores.service.interfaces.IR2UploadService;
 import com.anunciadores.service.interfaces.ITdcService;
 import com.anunciadores.util.UtilDate;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,16 @@ public class TcdController {
 
     @Autowired
     private UtilDate utilDate;
+
+    @Autowired
+    private TcdRachaService rachaService;
+
+    /** Racha de dias seguidos, totales e insignias de la persona. */
+    @GetMapping("/tcd/racha/{idPersona}")
+    public ResponseEntity<Map<String, Object>> racha(@PathVariable Integer idPersona) {
+        CurrentUser.requireSelfOrAdmin(idPersona);
+        return ResponseEntity.ok(rachaService.racha(idPersona));
+    }
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadImage(@RequestParam("image") MultipartFile file,

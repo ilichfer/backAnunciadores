@@ -385,10 +385,23 @@ LOGGER.error("Error inesperado", e);
       } 
 return per;
     }
+    /**
+     * Actualiza solo la contrasena (y reactiva la cuenta) sobre la persona guardada.
+     * Antes se guardaba una entidad armada con 9 campos y se borraban el resto de datos
+     * (celular, direccion, Telegram, fechas...) cada vez que alguien cambiaba su contrasena.
+     */
+    @Transactional
     public Persona savePassword(Persona persona) {
-persona.setPassword(encriptar(persona.getPassword()));
-        persona.setPasswordHashVersion(1);
-return (Persona)this.personaRepository.save(persona);
+      Persona existente = this.personaRepository.findById(persona.getId()).orElse(null);
+      if (existente == null) {
+        return null;
+      }
+      existente.setPassword(encriptar(persona.getPassword()));
+      existente.setPasswordHashVersion(1);
+      if (persona.getEstado() != null) {
+        existente.setEstado(persona.getEstado());
+      }
+      return this.personaRepository.save(existente);
     }
     public List<PersonaDto> findAllUsuariosRol() {
 List<PersonaDto> listDto = new ArrayList<>();

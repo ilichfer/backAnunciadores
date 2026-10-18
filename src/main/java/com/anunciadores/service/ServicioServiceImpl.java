@@ -504,6 +504,10 @@ serv.setPosicion(((PosicionesMinisterio)this.posicionesRepository.findById(Integ
 Optional<Ministerio> ministerio = this.ministerioRepository.findById(Integer.valueOf(servicio.getIdMinisterio()));
 serv.setNombreMinisterio(((Ministerio)ministerio.get()).getNombre());
 serv.setIdMinisterio(Integer.valueOf(((Ministerio)ministerio.get()).getId()));
+serv.setIdServicio(servicio.getId());
+serv.setIdPersona(servicio.getIdPersona());
+serv.setConfirmacion(servicio.getConfirmacion());
+serv.setMotivoConfirmacion(servicio.getMotivoConfirmacion());
 return serv;
     }
     private ServicioResponseDto buildServicioCoordinadorResponseDto(Coordinador coordinador) {

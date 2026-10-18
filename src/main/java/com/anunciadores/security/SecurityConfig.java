@@ -57,6 +57,8 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.POST, "/api/auth/loginReact", "/api/updatePassword",
                         "/api/personas/register", "/api/contacto").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/imagen-mensual/*").permitAll()
+                // Calendario suscrito en Google Calendar: protegido por su token secreto
+                .antMatchers(HttpMethod.GET, "/api/calendario/ics/*").permitAll()
                 // Solo administradores
                 .antMatchers("/api/personas/todas", "/api/personas/*/rol", "/api/personas/*/toggle-active").hasRole(ADMIN)
                 .antMatchers("/api/buscar/**", "/api/consutarEmail", "/api/consutarDoc").hasRole(ADMIN)
@@ -65,6 +67,8 @@ public class SecurityConfig {
                 .antMatchers("/api/cursos", "/api/cursos/**").hasRole(ADMIN)
                 .antMatchers(HttpMethod.PUT, "/api/configuracion/**").hasRole(ADMIN)
                 .antMatchers("/api/ministries/addposition", "/api/ministeries/**").hasRole(ADMIN)
+                .antMatchers("/api/auditoria", "/api/auditoria/**", "/api/panel-pastor", "/api/panel-pastor/**",
+                        "/api/whatsapp/**").hasRole(ADMIN)
                 .antMatchers("/api/savecordinador", "/api/saveService", "/api/updateprog",
                         "/api/scheduleByDate", "/api/findprog").hasRole(ADMIN)
                 // Cualquier usuario con sesion

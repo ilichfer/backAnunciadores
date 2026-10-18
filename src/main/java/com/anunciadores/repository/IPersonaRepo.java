@@ -45,4 +45,12 @@ public interface IPersonaRepo extends JpaRepository<Persona, Integer> {
   Persona findPersonaAndIdMenu(@Param("idPersona") int paramInt1, @Param("idMenu") int paramInt2);
   @Query(nativeQuery = true, value = "select p.* from persona p WHERE p.estado = false  order by p.nombre asc")
   List<Persona> findPeopleDisabled();
+
+  /** Personas activas que cumplen anos en el dia y mes indicados. */
+  @Query(nativeQuery = true, value = "select p.* from persona p where p.estado = 1 and MONTH(p.fechanacimiento) = :mes and DAY(p.fechanacimiento) = :dia order by p.nombre")
+  List<Persona> findCumpleanerosDelDia(@Param("mes") int mes, @Param("dia") int dia);
+  /** Personas activas con el rol indicado (1 = ADMIN). */
+  @Query(nativeQuery = true, value = "select distinct p.* from persona p join persona_rol pr on pr.id_persona = p.id where p.estado = 1 and pr.id_rol = :idRol")
+  List<Persona> findActivasPorRol(@Param("idRol") int idRol);
+  Optional<Persona> findByCalendarioToken(String calendarioToken);
 }

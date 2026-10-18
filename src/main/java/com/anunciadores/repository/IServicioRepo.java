@@ -44,4 +44,11 @@ public interface IServicioRepo extends JpaRepository<Servicio, Integer> {
   List<Servicio> findServiciosMesPersona(@Param("idPersona") int idPersona, @Param("inicioMes") Date inicioMes, @Param("finMes") Date finMes);
   @Query("SELECT m.nombre, COUNT(s.id) FROM Servicio s JOIN PosicionesMinisterio pm ON s.idPosicion = pm.id JOIN Ministerio m ON pm.idMinisterio = m.id WHERE s.idPersona = :idPersona AND s.fechaServicio >= :inicioMes AND s.fechaServicio <= :finMes GROUP BY m.nombre")
   List<Object[]> countServiciosPorMinisterio(@Param("idPersona") int idPersona, @Param("inicioMes") Date inicioMes, @Param("finMes") Date finMes);
+
+  /** Turnos en un rango de fechas (calendario general), ordenados por fecha. */
+  @Query("SELECT s FROM Servicio s WHERE s.fechaServicio >= :desde AND s.fechaServicio <= :hasta ORDER BY s.fechaServicio ASC, s.idMinisterio ASC")
+  List<Servicio> findByRango(@Param("desde") Date desde, @Param("hasta") Date hasta);
+  /** Turnos de una persona en un rango de fechas (calendario personal). */
+  @Query("SELECT s FROM Servicio s WHERE s.idPersona = :idPersona AND s.fechaServicio >= :desde AND s.fechaServicio <= :hasta ORDER BY s.fechaServicio ASC")
+  List<Servicio> findByPersonaYRango(@Param("idPersona") int idPersona, @Param("desde") Date desde, @Param("hasta") Date hasta);
 }

@@ -85,6 +85,10 @@ class SecurityRulesTest {
     private ITdcService tdcService;
     @MockBean
     private IR2UploadService r2UploadService;
+    @MockBean
+    private com.anunciadores.service.AuditoriaService auditoriaService;
+    @MockBean
+    private com.anunciadores.service.TcdRachaService tcdRachaService;
 
     private String token(int id, String rol) {
         return "Bearer " + jwtService.generarToken(id, "100" + id, rol, "Persona " + id);

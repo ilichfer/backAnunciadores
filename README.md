@@ -152,3 +152,28 @@ systemctl restart tomcat        # nunca arrancar Tomcat con startup.sh como root
 - Las imágenes se validan por su contenido real (JPG, PNG, WEBP, GIF).
 - Contraseñas en BCrypt; las antiguas en MD5 se migran solas en el siguiente inicio de sesión.
 - Las respuestas nunca incluyen la contraseña ni detalles internos de los errores.
+
+## Funcionalidades pastorales (octubre 2026)
+
+Migración SQL: `src/main/resources/querys/migraciones/2026-10-18_funcionalidades_pastorales.sql` (ejecutar una vez).
+
+| Funcionalidad | Endpoints |
+|---|---|
+| Bitácora de cambios (ADMIN) | `GET /api/auditoria`, `GET /api/auditoria/acciones` |
+| Confirmar turno / avisar que no puede | `PUT /api/servicios/{id}/confirmacion` `{estado: CONFIRMADO\|NO_PUEDE, motivo}` |
+| Calendario y Google Calendar | `GET /api/calendario`, `GET /api/calendario/suscripcion`, `GET /api/calendario/ics/{token}.ics` (público con token) |
+| Racha e insignias de TCD | `GET /api/tcd/racha/{idPersona}` |
+| Notificaciones push | `GET /api/push/configuracion`, `POST/DELETE /api/push/suscripcion` |
+| Panel pastoral y resumen semanal (ADMIN) | `GET /api/panel-pastor`, `GET /api/panel-pastor/resumenes`, `POST /api/panel-pastor/resumenes/generar` |
+| WhatsApp (ADMIN) | `GET /api/whatsapp/estado`, `POST /api/whatsapp/conectar`, `PUT /api/whatsapp/preferencias`, `POST /api/whatsapp/prueba` |
+
+Tareas automáticas (hora de Bogotá): cumpleaños 8:00, recordatorio de TCD 19:00, resumen semanal lunes 7:00.
+Siempre crean la notificación en la app y el push; WhatsApp solo si el admin activó ese envío en Panel pastoral.
+
+Configuración nueva en `application-secrets.properties`:
+
+| Propiedad | Descripción |
+|---|---|
+| `push.vapid.public-key` / `push.vapid.private-key` | Claves VAPID (generar una vez; si cambian, los dispositivos deben volver a suscribirse) |
+| `whatsapp.api-url` / `whatsapp.api-key` | Evolution API del VPS (`http://127.0.0.1:8085` y su `AUTHENTICATION_API_KEY`) |
+

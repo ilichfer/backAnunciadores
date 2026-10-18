@@ -41,7 +41,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Integer id = claims.get(JwtService.CLAIM_ID, Integer.class);
                 String rol = claims.get(JwtService.CLAIM_ROL, String.class);
                 if (id != null && rol != null) {
-                    AuthenticatedUser user = new AuthenticatedUser(id, claims.getSubject(), rol);
+                    AuthenticatedUser user = new AuthenticatedUser(id, claims.getSubject(), rol,
+                            claims.get(JwtService.CLAIM_NOMBRE, String.class));
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                             user, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + rol)));
                     SecurityContextHolder.getContext().setAuthentication(auth);
