@@ -89,9 +89,18 @@ public class WhatsAppService {
                 throw new IOException("Evolution respondió " + creada.statusCode() + " al crear la instancia");
             }
             JsonNode json = mapper.readTree(creada.body());
-            return qrDesde(json.path("qrcode"));
+            if (!json.path("qrcode").path("base64").asText("").isEmpty()) {
+                return qrDesde(json.path("qrcode"));
+            }
+            resp = get("/instance/connect/" + instancia);
         }
-        return qrDesde(mapper.readTree(resp.body()));
+        // Evolution puede tardar unos segundos en tener el QR listo ({"count":0}): se reintenta
+        JsonNode json = mapper.readTree(resp.body());
+        for (int intento = 0; intento < 5 && json.path("base64").asText("").isEmpty(); intento++) {
+            Thread.sleep(2000);
+            json = mapper.readTree(get("/instance/connect/" + instancia).body());
+        }
+        return qrDesde(json);
     }
 
     /**
